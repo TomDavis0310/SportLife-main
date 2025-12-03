@@ -1,0 +1,76 @@
+﻿import 'package:dio/dio.dart';
+import '../models/prediction.dart';
+
+class PredictionApi {
+  final Dio dio;
+
+  PredictionApi(this.dio);
+
+  Future<List<Prediction>> getMyPredictions({int page = 1}) async {
+    final response = await dio.get(
+      '/predictions',
+      queryParameters: {'page': page},
+    );
+    final List data = response.data['data'];
+    return data.map((e) => Prediction.fromJson(e)).toList();
+  }
+
+  Future<Prediction> createPrediction({
+    required int matchId,
+    required int predictedHomeScore,
+    required int predictedAwayScore,
+    int? firstScorerId,
+  }) async {
+    final response = await dio.post(
+      '/predictions',
+      data: {
+        'match_id': matchId,
+        'predicted_home_score': predictedHomeScore,
+        'predicted_away_score': predictedAwayScore,
+        if (firstScorerId != null) 'first_scorer_id': firstScorerId,
+      },
+    );
+    return Prediction.fromJson(response.data['data']);
+  }
+
+  Future<Prediction> updatePrediction({
+    required int predictionId,
+    required int predictedHomeScore,
+    required int predictedAwayScore,
+    int? firstScorerId,
+  }) async {
+    final response = await dio.put(
+      '/predictions/$predictionId',
+      data: {
+        'home_score': predictedHomeScore,
+        'away_score': predictedAwayScore,
+        'predicted_home_score': predictedHomeScore,
+        'predicted_away_score': predictedAwayScore,
+        if (firstScorerId != null) 'first_scorer_id': firstScorerId,
+      },
+    );
+    return Prediction.fromJson(response.data['data']);
+  }
+
+  Future<List<Map<String, dynamic>>> getLeaderboard({
+    String period = 'all_time',
+    int? competitionId,
+    int page = 1,
+  }) async {
+    final response = await dio.get(
+      '/predictions/leaderboard',
+      queryParameters: {
+        'period': period,
+        if (competitionId != null) 'competition_id': competitionId,
+        'page': page,
+      },
+    );
+    return List<Map<String, dynamic>>.from(response.data['data']);
+  }
+
+  Future<Map<String, dynamic>> getMyStats() async {
+    final response = await dio.get('/predictions/stats');
+    return response.data['data'];
+  }
+}
+

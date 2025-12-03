@@ -1,0 +1,122 @@
+name: sportlife
+description: "SportLife - Sports Prediction App like Flashscore"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+  flutter: ^3.24.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Network
+  dio: ^5.4.3
+  retrofit: ^4.1.0
+  json_annotation: ^4.8.1
+
+  # Local Storage
+  shared_preferences: ^2.2.3
+  flutter_secure_storage: ^9.0.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # UI Components
+  cupertino_icons: ^1.0.6
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  flutter_svg: ^2.0.10+1
+  lottie: ^3.1.0
+
+  # Navigation
+  go_router: ^14.2.0
+
+  # Authentication
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.0
+
+  # Push Notifications
+  firebase_core: ^2.31.0
+  firebase_messaging: ^14.9.2
+  flutter_local_notifications: ^17.1.2
+
+  # Real-time
+  web_socket_channel: ^2.4.5
+  laravel_echo_null: ^0.0.4
+  pusher_client_socket: ^0.0.3
+
+  # Utils
+  intl: any
+  timeago: ^3.6.1
+  url_launcher: ^6.2.6
+  share_plus: ^9.0.0
+  image_picker: ^1.1.0
+  image_cropper: ^8.0.2
+  permission_handler: ^11.3.1
+  connectivity_plus: ^6.0.3
+  package_info_plus: ^8.0.0
+  device_info_plus: ^10.1.0
+
+  # Animation
+  flutter_animate: ^4.5.0
+  animations: ^2.0.11
+
+  # Charts
+  fl_chart: ^0.68.0
+
+  # Pull to refresh
+  pull_to_refresh: ^2.0.0
+
+  # Infinite scroll
+  infinite_scroll_pagination: ^4.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.9
+  retrofit_generator: ^8.1.0
+  json_serializable: ^6.7.1
+  riverpod_generator: ^2.4.0
+  hive_generator: ^2.0.1
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
+  mockito: ^5.4.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  adaptive_icon_background: "#1B5E20"
+  adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
+
+flutter_native_splash:
+  color: "#1B5E20"
+  image: "assets/images/splash_logo.png"
+  android: true
+  ios: true
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
