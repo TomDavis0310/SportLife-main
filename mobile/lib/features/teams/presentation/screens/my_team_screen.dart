@@ -86,7 +86,7 @@ class MyTeamScreen extends ConsumerWidget {
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: AppTheme.primary.withOpacity(0.1),
+                            backgroundColor: AppTheme.primary.withAlpha(26),
                             child: Text(
                               '${player['jersey_number']}',
                               style: const TextStyle(
@@ -141,7 +141,7 @@ class MyTeamScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: selectedPosition,
+                initialValue: selectedPosition,
                 decoration: const InputDecoration(labelText: 'Vị trí'),
                 items: positions.map((p) {
                   return DropdownMenuItem(value: p, child: Text(p));
@@ -158,20 +158,23 @@ class MyTeamScreen extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () async {
+              final navigator = Navigator.of(context);
+              final reader = ref;
               try {
-                await ref.read(teamApiProvider).addPlayer(
+                await reader.read(teamApiProvider).addPlayer(
                       name: nameController.text,
                       position: selectedPosition,
                       jerseyNumber: int.parse(numberController.text),
                     );
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ref.refresh(myTeamProvider);
-                }
+                if (!navigator.mounted) return;
+                navigator.pop();
+                final _ = reader.refresh(myTeamProvider);
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Lỗi: $e')),
-                );
+                if (navigator.mounted) {
+                  ScaffoldMessenger.of(navigator.context).showSnackBar(
+                    SnackBar(content: Text('Lỗi: $e')),
+                  );
+                }
               }
             },
             child: const Text('Thêm'),
@@ -194,16 +197,19 @@ class MyTeamScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () async {
+              final navigator = Navigator.of(context);
+              final reader = ref;
               try {
-                await ref.read(teamApiProvider).removePlayer(playerId);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ref.refresh(myTeamProvider);
-                }
+                await reader.read(teamApiProvider).removePlayer(playerId);
+                if (!navigator.mounted) return;
+                navigator.pop();
+                final _ = reader.refresh(myTeamProvider);
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Lỗi: $e')),
-                );
+                if (navigator.mounted) {
+                  ScaffoldMessenger.of(navigator.context).showSnackBar(
+                    SnackBar(content: Text('Lỗi: $e')),
+                  );
+                }
               }
             },
             child: const Text('Xóa', style: TextStyle(color: Colors.red)),

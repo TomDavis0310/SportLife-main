@@ -95,10 +95,10 @@ class _NotificationItem extends ConsumerWidget {
           decoration: BoxDecoration(
             color: isRead
                 ? null
-                : theme.colorScheme.primaryContainer.withOpacity(0.3),
+                : theme.colorScheme.primaryContainer.withAlpha(77),
             border: Border(
               bottom: BorderSide(
-                color: theme.colorScheme.outline.withOpacity(0.2),
+                color: theme.colorScheme.outline.withAlpha(51),
               ),
             ),
           ),
@@ -110,7 +110,7 @@ class _NotificationItem extends ConsumerWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: _getIconColor(notification.type).withOpacity(0.1),
+                  color: _getIconColor(notification.type).withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -80,7 +80,7 @@ class LeaderboardScreen extends ConsumerWidget {
   Widget _buildTopThree(List<dynamic> topThree) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -180,7 +180,7 @@ class LeaderboardScreen extends ConsumerWidget {
           width: 60,
           height: height,
           decoration: BoxDecoration(
-            color: medalColor.withOpacity(0.3),
+            color: medalColor.withAlpha(77),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
           ),
         ),

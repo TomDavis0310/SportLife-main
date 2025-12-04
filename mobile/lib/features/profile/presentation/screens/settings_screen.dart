@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -115,10 +115,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () {},
           ),
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('Phiên bản'),
-            subtitle: const Text('1.0.0 (Build 1)'),
+          const ListTile(
+            leading: Icon(Icons.info),
+            title: Text('Phiên bản'),
+            subtitle: Text('1.0.0 (Build 1)'),
           ),
 
           const SizedBox(height: 32),
@@ -132,7 +132,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           color: AppTheme.primary,
           fontWeight: FontWeight.bold,
           fontSize: 14,

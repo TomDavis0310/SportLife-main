@@ -1,4 +1,5 @@
 ﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import '../../features/auth/data/models/user.dart';
 import '../../features/auth/data/api/auth_api.dart';
 import '../network/dio_client.dart';
@@ -57,7 +58,32 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
       await SecureStorage.saveToken(response.token);
       state = AsyncValue.data(AuthState(user: response.user));
     } catch (e) {
-      state = AsyncValue.data(AuthState(error: e.toString()));
+      // If it's a Dio error, try to extract a readable message from the response
+      if (e is DioException) {
+        final data = e.response?.data;
+        // Log raw response for debugging
+        // ignore: avoid_print
+        print('Auth login error response: $data');
+        String msg = e.toString();
+        if (data != null) {
+          if (data is Map && data['errors'] != null) {
+            try {
+              msg = (data['errors'] as Map).values
+                  .expand((v) => (v as List).map((i) => i.toString()))
+                  .join(', ');
+            } catch (_) {
+              msg = data.toString();
+            }
+          } else if (data['message'] != null) {
+            msg = data['message'].toString();
+          } else {
+            msg = data.toString();
+          }
+        }
+        state = AsyncValue.data(AuthState(error: msg));
+      } else {
+        state = AsyncValue.data(AuthState(error: e.toString()));
+      }
     }
   }
 
@@ -78,7 +104,31 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
       await SecureStorage.saveToken(response.token);
       state = AsyncValue.data(AuthState(user: response.user));
     } catch (e) {
-      state = AsyncValue.data(AuthState(error: e.toString()));
+      // Extract readable server validation messages for Dio errors
+      if (e is DioException) {
+        final data = e.response?.data;
+        // ignore: avoid_print
+        print('Auth register error response: $data');
+        String msg = e.toString();
+        if (data != null) {
+          if (data is Map && data['errors'] != null) {
+            try {
+              msg = (data['errors'] as Map).values
+                  .expand((v) => (v as List).map((i) => i.toString()))
+                  .join(', ');
+            } catch (_) {
+              msg = data.toString();
+            }
+          } else if (data['message'] != null) {
+            msg = data['message'].toString();
+          } else {
+            msg = data.toString();
+          }
+        }
+        state = AsyncValue.data(AuthState(error: msg));
+      } else {
+        state = AsyncValue.data(AuthState(error: e.toString()));
+      }
     }
   }
 
@@ -129,7 +179,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
       );
       state = AsyncValue.data(AuthState(user: user));
     } catch (e) {
-      state = AsyncValue.data(state.value!.copyWith(error: e.toString()));
+      final currentState = state.value ?? const AuthState();
+      state = AsyncValue.data(currentState.copyWith(error: e.toString()));
     }
   }
 }

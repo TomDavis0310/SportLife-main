@@ -290,9 +290,7 @@ class _RewardDetailScreenState extends ConsumerState<RewardDetailScreen> {
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: theme.colorScheme.outline.withOpacity(
-                                  0.3,
-                                ),
+                                color: theme.colorScheme.outline.withAlpha(77),
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -379,9 +377,9 @@ class _RewardDetailScreenState extends ConsumerState<RewardDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha(26),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withAlpha(128)),
       ),
       child: Text(
         text,

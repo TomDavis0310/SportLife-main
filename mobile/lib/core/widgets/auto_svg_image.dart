@@ -98,12 +98,12 @@ class AutoSvgImage extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
+        color: Colors.grey.withAlpha(26),
         borderRadius: borderRadius ?? BorderRadius.circular(8),
       ),
       child: Icon(
         Icons.image_outlined,
-        color: Colors.grey.withOpacity(0.5),
+        color: Colors.grey.withAlpha(128),
         size: (width ?? height ?? 24) * 0.6,
       ),
     );

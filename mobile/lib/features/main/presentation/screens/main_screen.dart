@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/providers/auth_provider.dart';
@@ -43,53 +43,53 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     ];
 
     final List<NavigationDestination> destinations = [
-      NavigationDestination(
-        icon: const Icon(Icons.home_rounded, color: AppTheme.grey),
+      const NavigationDestination(
+        icon: Icon(Icons.home_rounded, color: AppTheme.grey),
         selectedIcon:
-            const Icon(Icons.home_rounded, color: AppTheme.primary),
+            Icon(Icons.home_rounded, color: AppTheme.primary),
         label: 'Trang chủ',
       ),
-      NavigationDestination(
+      const NavigationDestination(
         icon:
-            const Icon(Icons.sports_soccer_rounded, color: AppTheme.grey),
-        selectedIcon: const Icon(Icons.sports_soccer_rounded,
+            Icon(Icons.sports_soccer_rounded, color: AppTheme.grey),
+        selectedIcon: Icon(Icons.sports_soccer_rounded,
             color: AppTheme.primary),
         label: 'Trận Đấu',
       ),
-      NavigationDestination(
-        icon: const Icon(Icons.analytics_rounded, color: AppTheme.grey),
+      const NavigationDestination(
+        icon: Icon(Icons.analytics_rounded, color: AppTheme.grey),
         selectedIcon:
-            const Icon(Icons.analytics_rounded, color: AppTheme.primary),
+            Icon(Icons.analytics_rounded, color: AppTheme.primary),
         label: 'Dự Đoán',
       ),
       if (isSponsor || isManager)
-        NavigationDestination(
-          icon: const Icon(Icons.emoji_events_rounded, color: AppTheme.grey),
-          selectedIcon: const Icon(Icons.emoji_events_rounded, color: AppTheme.primary),
+        const NavigationDestination(
+          icon: Icon(Icons.emoji_events_rounded, color: AppTheme.grey),
+          selectedIcon: Icon(Icons.emoji_events_rounded, color: AppTheme.primary),
           label: 'Giải Đấu',
         ),
       if (isManager)
-        NavigationDestination(
-          icon: const Icon(Icons.groups_rounded, color: AppTheme.grey),
-          selectedIcon: const Icon(Icons.groups_rounded, color: AppTheme.primary),
+        const NavigationDestination(
+          icon: Icon(Icons.groups_rounded, color: AppTheme.grey),
+          selectedIcon: Icon(Icons.groups_rounded, color: AppTheme.primary),
           label: 'Đội bóng',
         ),
       if (isSponsor)
-        NavigationDestination(
-          icon: const Icon(Icons.business_center_rounded, color: AppTheme.grey),
-          selectedIcon: const Icon(Icons.business_center_rounded, color: AppTheme.primary),
+        const NavigationDestination(
+          icon: Icon(Icons.business_center_rounded, color: AppTheme.grey),
+          selectedIcon: Icon(Icons.business_center_rounded, color: AppTheme.primary),
           label: 'Tài trợ',
         ),
-      NavigationDestination(
-        icon: const Icon(Icons.newspaper_rounded, color: AppTheme.grey),
+      const NavigationDestination(
+        icon: Icon(Icons.newspaper_rounded, color: AppTheme.grey),
         selectedIcon:
-            const Icon(Icons.newspaper_rounded, color: AppTheme.primary),
+            Icon(Icons.newspaper_rounded, color: AppTheme.primary),
         label: 'Tin tức',
       ),
-      NavigationDestination(
-        icon: const Icon(Icons.person_rounded, color: AppTheme.grey),
+      const NavigationDestination(
+        icon: Icon(Icons.person_rounded, color: AppTheme.grey),
         selectedIcon:
-            const Icon(Icons.person_rounded, color: AppTheme.primary),
+            Icon(Icons.person_rounded, color: AppTheme.primary),
         label: 'Cá nhân',
       ),
     ];
@@ -106,7 +106,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withAlpha(13),
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
@@ -116,7 +116,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           height: 70,
           elevation: 0,
           backgroundColor: Colors.white,
-          indicatorColor: AppTheme.primary.withOpacity(0.15),
+          indicatorColor: AppTheme.primary.withAlpha(38),
           selectedIndex: _currentIndex,
           onDestinationSelected: (index) => _onTabTapped(index, routes),
           labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,

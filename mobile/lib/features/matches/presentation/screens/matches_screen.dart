@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -292,7 +292,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen>
       if (date.isBefore(_startDate.add(const Duration(days: 3)))) {
         _startDate = _startDate.subtract(const Duration(days: 7));
       } else if (date.isAfter(
-          _startDate.add(Duration(days: _dateWindowDays - 4)))) {
+          _startDate.add(const Duration(days: _dateWindowDays - 4)))) {
         _startDate = _startDate.add(const Duration(days: 7));
       }
       _selectedDate = date;
@@ -313,7 +313,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen>
     final index = date.difference(_startDate).inDays;
     if (index < 0 || index >= _dateWindowDays) return;
 
-    final extentWithSpacing = _dateItemExtent + 8;
+    const extentWithSpacing = _dateItemExtent + 8;
     final targetOffset = (index * extentWithSpacing) - (_dateItemExtent * 2);
     final maxScroll = _dateScrollController.position.maxScrollExtent;
     final clampedOffset = targetOffset.clamp(0.0, maxScroll).toDouble();
@@ -374,10 +374,10 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
           child: Row(
-            children: const [
+            children: [
               Icon(Icons.sports, color: AppTheme.primary),
               SizedBox(width: 8),
               Text(
@@ -528,7 +528,7 @@ class _OtherSportCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withAlpha(38),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(

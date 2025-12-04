@@ -19,7 +19,7 @@ class FeaturedNewsCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withAlpha(26),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -55,7 +55,7 @@ class FeaturedNewsCard extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                    colors: [Colors.transparent, Colors.black.withAlpha(204)],
                     stops: const [0.4, 1.0],
                   ),
                 ),

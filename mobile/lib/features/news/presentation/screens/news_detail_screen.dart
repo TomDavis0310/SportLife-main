@@ -81,7 +81,7 @@ class NewsDetailScreen extends ConsumerWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppTheme.primary.withOpacity(0.1),
+                        color: AppTheme.primary.withAlpha(26),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(

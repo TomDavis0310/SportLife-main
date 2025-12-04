@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ShimmerLoading extends StatelessWidget {
@@ -37,10 +37,10 @@ class ShimmerMatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return const Card(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           children: [
             Row(
@@ -49,7 +49,7 @@ class ShimmerMatchCard extends StatelessWidget {
                 // Home team
                 Expanded(
                   child: Column(
-                    children: const [
+                    children: [
                       ShimmerLoading(width: 50, height: 50, borderRadius: 25),
                       SizedBox(height: 8),
                       ShimmerLoading(width: 80, height: 14),
@@ -58,7 +58,7 @@ class ShimmerMatchCard extends StatelessWidget {
                 ),
                 // Score
                 Column(
-                  children: const [
+                  children: [
                     ShimmerLoading(width: 60, height: 12),
                     SizedBox(height: 8),
                     ShimmerLoading(width: 80, height: 28),
@@ -69,7 +69,7 @@ class ShimmerMatchCard extends StatelessWidget {
                 // Away team
                 Expanded(
                   child: Column(
-                    children: const [
+                    children: [
                       ShimmerLoading(width: 50, height: 50, borderRadius: 25),
                       SizedBox(height: 8),
                       ShimmerLoading(width: 80, height: 14),
@@ -105,18 +105,18 @@ class ShimmerNewsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+    return const Card(
+      margin: EdgeInsets.only(bottom: 16),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12),
         child: Row(
           children: [
-            const ShimmerLoading(width: 100, height: 80, borderRadius: 8),
-            const SizedBox(width: 12),
+            ShimmerLoading(width: 100, height: 80, borderRadius: 8),
+            SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   ShimmerLoading(height: 16),
                   SizedBox(height: 8),
                   ShimmerLoading(height: 14),
@@ -152,25 +152,25 @@ class ShimmerLeaderboardItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+    return const Padding(
+      padding: EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          const ShimmerLoading(width: 30, height: 20),
-          const SizedBox(width: 12),
-          const ShimmerLoading(width: 40, height: 40, borderRadius: 20),
-          const SizedBox(width: 12),
+          ShimmerLoading(width: 30, height: 20),
+          SizedBox(width: 12),
+          ShimmerLoading(width: 40, height: 40, borderRadius: 20),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 ShimmerLoading(width: 120, height: 14),
                 SizedBox(height: 4),
                 ShimmerLoading(width: 80, height: 12),
               ],
             ),
           ),
-          const ShimmerLoading(width: 60, height: 16),
+          ShimmerLoading(width: 60, height: 16),
         ],
       ),
     );
@@ -203,12 +203,12 @@ class ShimmerRewardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return const Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Expanded(child: ShimmerLoading(borderRadius: 8)),
             SizedBox(height: 12),
             ShimmerLoading(height: 16),
@@ -238,8 +238,8 @@ class ShimmerProfileHeader extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: List.generate(
             3,
-            (index) => Column(
-              children: const [
+            (index) => const Column(
+              children: [
                 ShimmerLoading(width: 50, height: 24),
                 SizedBox(height: 4),
                 ShimmerLoading(width: 60, height: 12),

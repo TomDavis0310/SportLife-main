@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
@@ -212,7 +212,7 @@ class _PredictionFormState extends ConsumerState<PredictionForm> {
                         style: TextStyle(fontSize: 13, color: Colors.grey),
                       )
                     : DropdownButtonFormField<int?>(
-                        value: _firstScorerId,
+                        initialValue: _firstScorerId,
                         decoration: const InputDecoration(
                           hintText: 'Chọn cầu thủ (không bắt buộc)',
                           border: OutlineInputBorder(),

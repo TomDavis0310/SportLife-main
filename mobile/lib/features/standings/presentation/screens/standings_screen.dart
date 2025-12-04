@@ -151,10 +151,10 @@ class StandingsScreen extends ConsumerWidget {
 
     if (position != null) {
       if (position <= 4) {
-        bgColor = Colors.green.withOpacity(0.8);
+        bgColor = Colors.green.withAlpha(204);
         textColor = Colors.white;
       } else if (position >= 18) {
-        bgColor = Colors.red.withOpacity(0.8);
+        bgColor = Colors.red.withAlpha(204);
         textColor = Colors.white;
       }
     }

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../data/models/match.dart';
@@ -162,17 +162,17 @@ class _EventBubble extends StatelessWidget {
                   ),
                 ],
         ),
-        if (subtitle != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[700],
-            ),
-            textAlign: alignRight ? TextAlign.right : TextAlign.left,
+        ...[
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[700],
           ),
-        ],
+          textAlign: alignRight ? TextAlign.right : TextAlign.left,
+        ),
+      ],
         for (final line in details) ...[
           const SizedBox(height: 4),
           Text(
@@ -191,9 +191,9 @@ class _EventBubble extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 120),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withAlpha(31),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withAlpha(102)),
       ),
       child: content,
     );

@@ -219,9 +219,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       final pickedFile = await picker.pickImage(source: source);
       if (pickedFile != null) {
         // Upload image
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Đang tải ảnh lên...')));
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đang tải ảnh lên...')),
+        );
       }
     }
   }
