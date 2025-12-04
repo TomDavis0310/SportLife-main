@@ -70,7 +70,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withAlpha(77),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -97,7 +97,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   'Dự đoán bóng đá',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withAlpha(204),
                   ),
                 ),
                 const SizedBox(height: 48),

@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -289,7 +289,7 @@ class PredictionsScreen extends ConsumerWidget {
 class _PredictionCountdown extends StatefulWidget {
   final DateTime matchTime;
 
-  const _PredictionCountdown({super.key, required this.matchTime});
+  const _PredictionCountdown({required this.matchTime});
 
   @override
   State<_PredictionCountdown> createState() => _PredictionCountdownState();

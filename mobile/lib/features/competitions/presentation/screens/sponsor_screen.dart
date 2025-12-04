@@ -102,7 +102,7 @@ class SponsorScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: selectedType,
+                initialValue: selectedType,
                 decoration: const InputDecoration(labelText: 'Loại giải'),
                 items: const [
                   DropdownMenuItem(value: 'league', child: Text('League')),
@@ -125,8 +125,10 @@ class SponsorScreen extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () async {
+              final navigator = Navigator.of(context);
+              final reader = ref;
               try {
-                await ref
+                await reader
                     .read(managementCompetitionApiProvider)
                     .createCompetition(
                       name: nameController.text,
@@ -137,14 +139,15 @@ class SponsorScreen extends ConsumerWidget {
                           .add(const Duration(days: 365))
                           .toIso8601String(),
                     );
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ref.refresh(managedCompetitionsProvider);
-                }
+                if (!navigator.mounted) return;
+                navigator.pop();
+                final _ = reader.refresh(managedCompetitionsProvider);
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Lỗi: $e')),
-                );
+                if (navigator.mounted) {
+                  ScaffoldMessenger.of(navigator.context).showSnackBar(
+                    SnackBar(content: Text('Lỗi: $e')),
+                  );
+                }
               }
             },
             child: const Text('Tạo'),
@@ -226,15 +229,18 @@ class _RegistrationsList extends ConsumerWidget {
                             ),
                             title: Text(team.name),
                             subtitle: Text('Trạng thái: $status'),
-                            trailing: status == 'pending'
+                                trailing: status == 'pending'
                                 ? ElevatedButton(
                                     onPressed: () async {
-                                      await ref
+                                      final navigator = Navigator.of(context);
+                                      final reader = ref;
+                                      await reader
                                           .read(managementCompetitionApiProvider)
                                           .approveRegistration(
                                               seasonId, team.id);
-                                      // Force rebuild/refresh logic would be better here
-                                      Navigator.pop(context);
+                                      if (!navigator.mounted) return;
+                                      navigator.pop();
+                                      final _ = reader.refresh(managedCompetitionsProvider);
                                     },
                                     child: const Text('Duyệt'),
                                   )

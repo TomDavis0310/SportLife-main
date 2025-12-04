@@ -3544,16 +3544,16 @@
         },
         {
             "name": "laravel/horizon",
-            "version": "v5.40.1",
+            "version": "v5.40.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/horizon.git",
-                "reference": "0c2916824b9ee2f925cecc7053f2a98cc542f290"
+                "reference": "005e5638478db9e25f7ae5cfb30c56846fbad793"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/horizon/zipball/0c2916824b9ee2f925cecc7053f2a98cc542f290",
-                "reference": "0c2916824b9ee2f925cecc7053f2a98cc542f290",
+                "url": "https://api.github.com/repos/laravel/horizon/zipball/005e5638478db9e25f7ae5cfb30c56846fbad793",
+                "reference": "005e5638478db9e25f7ae5cfb30c56846fbad793",
                 "shasum": ""
             },
             "require": {
@@ -3617,9 +3617,9 @@
             ],
             "support": {
                 "issues": "https://github.com/laravel/horizon/issues",
-                "source": "https://github.com/laravel/horizon/tree/v5.40.1"
+                "source": "https://github.com/laravel/horizon/tree/v5.40.2"
             },
-            "time": "2025-11-25T14:45:37+00:00"
+            "time": "2025-11-28T20:12:12+00:00"
         },
         {
             "name": "laravel/prompts",
@@ -6896,16 +6896,16 @@
         },
         {
             "name": "rize/uri-template",
-            "version": "0.4.0",
+            "version": "0.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rize/UriTemplate.git",
-                "reference": "56f374a9a42c7c3998f8b55b6b21b224de90c58b"
+                "reference": "abb53c8b73a5b6c24e11f49036ab842f560cad33"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rize/UriTemplate/zipball/56f374a9a42c7c3998f8b55b6b21b224de90c58b",
-                "reference": "56f374a9a42c7c3998f8b55b6b21b224de90c58b",
+                "url": "https://api.github.com/repos/rize/UriTemplate/zipball/abb53c8b73a5b6c24e11f49036ab842f560cad33",
+                "reference": "abb53c8b73a5b6c24e11f49036ab842f560cad33",
                 "shasum": ""
             },
             "require": {
@@ -6940,7 +6940,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rize/UriTemplate/issues",
-                "source": "https://github.com/rize/UriTemplate/tree/0.4.0"
+                "source": "https://github.com/rize/UriTemplate/tree/0.4.1"
             },
             "funding": [
                 {
@@ -6956,7 +6956,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2024-11-27T12:13:42+00:00"
+            "time": "2025-12-02T15:19:04+00:00"
         },
         {
             "name": "ryangjchandler/blade-capture-directive",
@@ -10654,16 +10654,16 @@
         },
         {
             "name": "laravel/sail",
-            "version": "v1.48.1",
+            "version": "v1.49.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/sail.git",
-                "reference": "ef122b223f5fca5e5d88bda5127c846710886329"
+                "reference": "070c7f34ca8dbece4350fbfe0bab580047dfacc7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/sail/zipball/ef122b223f5fca5e5d88bda5127c846710886329",
-                "reference": "ef122b223f5fca5e5d88bda5127c846710886329",
+                "url": "https://api.github.com/repos/laravel/sail/zipball/070c7f34ca8dbece4350fbfe0bab580047dfacc7",
+                "reference": "070c7f34ca8dbece4350fbfe0bab580047dfacc7",
                 "shasum": ""
             },
             "require": {
@@ -10713,7 +10713,7 @@
                 "issues": "https://github.com/laravel/sail/issues",
                 "source": "https://github.com/laravel/sail"
             },
-            "time": "2025-11-17T22:05:34+00:00"
+            "time": "2025-11-25T21:15:57+00:00"
         },
         {
             "name": "mockery/mockery",

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -11,12 +11,12 @@ class MatchHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLive = match.status == 'live';
-    final isFinished = match.status == 'finished';
+    final isLive = match.status == MatchStatus.live || match.status == MatchStatus.halftime;
+    final isFinished = match.status == MatchStatus.finished;
     final matchTime = DateTime.parse(match.matchTime);
 
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -161,7 +161,7 @@ class MatchHeader extends StatelessWidget {
         color: Colors.white,
         shape: BoxShape.circle,
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8),
+          BoxShadow(color: Colors.black.withAlpha(51), blurRadius: 8),
         ],
       ),
       child: logoUrl != null

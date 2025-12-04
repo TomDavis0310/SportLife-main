@@ -20,7 +20,7 @@ class LiveMatchCard extends StatelessWidget {
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppTheme.live.withOpacity(0.3),
+            color: AppTheme.live.withAlpha(77),
             width: 2,
           ),
         ),

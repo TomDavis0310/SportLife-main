@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/reward_provider.dart';
@@ -40,7 +40,7 @@ class MyRewardsScreen extends ConsumerWidget {
                   color: theme.colorScheme.error,
                 ),
                 const SizedBox(height: 16),
-                Text('Không thể tải phần thưởng'),
+                const Text('Không thể tải phần thưởng'),
                 const SizedBox(height: 8),
                 FilledButton(
                   onPressed: () => ref.invalidate(userRewardsProvider),
@@ -239,14 +239,14 @@ class _MyRewardCard extends StatelessWidget {
         break;
       default:
         color = Colors.grey;
-        text = redemption.status ?? 'Không rõ';
+        text = redemption.status.isNotEmpty ? redemption.status : 'Không rõ';
         icon = Icons.help;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha(26),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

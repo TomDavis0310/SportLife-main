@@ -1,9 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/providers/auth_provider.dart';
+
+// Giả định AuthState là một class có chứa isLoggedIn (bool) và error (String?)
+// Giả định authStateProvider là StateNotifierProvider<Notifier, AsyncValue<AuthState>>
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -31,6 +33,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
+  // Logic đăng ký đã được đơn giản hóa.
+  // Việc điều hướng và hiển thị lỗi sẽ được xử lý bởi ref.listen trong build.
   Future<void> _register() async {
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -40,6 +44,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
 
     if (_formKey.currentState!.validate()) {
+      // Chỉ cần gọi hàm đăng ký.
+      // Chúng ta không cần kiểm tra trạng thái ngay tại đây.
       await ref
           .read(authStateProvider.notifier)
           .register(
@@ -48,24 +54,44 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             _passwordController.text,
             _confirmPasswordController.text,
           );
-
-      final authState = ref.read(authStateProvider);
-      if (authState.valueOrNull?.isLoggedIn == true) {
-        if (mounted) context.go('/main');
-      } else if (authState.valueOrNull?.error != null) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(authState.value!.error!)));
-        }
-      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
-    final isLoading = authState.valueOrNull?.isLoading ?? false;
+    // Lấy trạng thái isLoading từ AsyncValue
+    final isLoading = authState.isLoading;
+
+    // SỬ DỤNG ref.listen để xử lý các side effect (điều hướng và SnackBar)
+    // Đây là cách làm đúng đắn và an toàn hơn trong Riverpod.
+    ref.listen<AsyncValue<dynamic>>(
+      authStateProvider,
+      (previous, next) {
+        // next.valueOrNull là giá trị của AuthState
+        final nextState = next.valueOrNull;
+
+        // 1. Xử lý điều hướng khi đăng ký/đăng nhập thành công
+        // Kiểm tra nếu người dùng đã đăng nhập (Giả định AuthState có thuộc tính isLoggedIn)
+        if (nextState != null && nextState.isLoggedIn == true) {
+          // Sử dụng mounted check an toàn hơn khi lắng nghe.
+          if (mounted) {
+            context.go('/main');
+          }
+        }
+
+        // 2. Xử lý hiển thị lỗi
+        // Kiểm tra nếu có lỗi và lỗi đó không phải là null trong trạng thái mới.
+        // Giả định `nextState` có thuộc tính `error` kiểu `String?`
+        if (nextState != null && nextState.error != null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(nextState.error!)),
+            );
+          }
+        }
+      },
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Đăng ký')),
@@ -80,19 +106,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Text(
                   'Tạo tài khoản mới',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-
                 const SizedBox(height: 8),
-
                 Text(
                   'Đăng ký để bắt đầu dự đoán',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
-
                 const SizedBox(height: 32),
 
                 // Name Field
@@ -110,7 +133,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 16),
 
                 // Email Field
@@ -131,7 +153,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 16),
 
                 // Password Field
@@ -164,7 +185,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 16),
 
                 // Confirm Password Field
@@ -226,7 +246,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               TextSpan(
                                 text: 'Điều khoản sử dụng',
                                 style: TextStyle(
-                                  color: AppTheme.primary,
+                                  // Sử dụng primary color của theme
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -234,7 +255,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               TextSpan(
                                 text: 'Chính sách bảo mật',
                                 style: TextStyle(
-                                  color: AppTheme.primary,
+                                  // Sử dụng primary color của theme
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -290,6 +312,3 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 }
-
-
-

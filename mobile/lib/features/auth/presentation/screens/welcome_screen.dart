@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -20,7 +20,7 @@ class WelcomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.1),
+                  color: AppTheme.primary.withAlpha(26),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -32,9 +32,9 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: 40),
 
               // Welcome Text
-              Text(
+              const Text(
                 'Welcome to SportLife',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.black,
@@ -42,9 +42,9 @@ class WelcomeScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              Text(
+              const Text(
                 'Dự đoán tỉ số, nhận quà cực chất!\nTham gia cộng đồng bóng đá sôi động nhất.',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   color: AppTheme.darkGrey,
                   height: 1.5,
@@ -67,9 +67,9 @@ class WelcomeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Đăng Nhập',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -89,9 +89,9 @@ class WelcomeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Đăng Ký Mới',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.primary,

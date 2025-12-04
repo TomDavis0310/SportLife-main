@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -25,7 +25,7 @@ class TeamDetailScreen extends ConsumerWidget {
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(team.shortName ?? team.name),
                 background: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,

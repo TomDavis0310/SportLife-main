@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class AppTheme {
   static const String fontFamily = 'Poppins';
@@ -48,7 +48,7 @@ class AppTheme {
       fontFamily: fontFamily,
       fontFamilyFallback: fontFallback,
       scaffoldBackgroundColor: background,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: primary,
         secondary: secondary,
         surface: white,
@@ -57,17 +57,17 @@ class AppTheme {
         onSecondary: black,
         onSurface: black,
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: background,
         foregroundColor: black,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: black,
         ),
-        iconTheme: const IconThemeData(color: black),
+        iconTheme: IconThemeData(color: black),
       ),
       textTheme: _buildTextTheme(black),
       cardTheme: CardThemeData(
@@ -75,7 +75,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: white.withOpacity(0.5), width: 1),
+          side: BorderSide(color: white.withAlpha(128), width: 1),
         ),
         margin: const EdgeInsets.only(bottom: 16),
       ),

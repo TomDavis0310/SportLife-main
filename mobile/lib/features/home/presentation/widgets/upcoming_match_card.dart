@@ -31,7 +31,7 @@ class UpcomingMatchCard extends StatelessWidget {
               width: 60,
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
+                color: AppTheme.primary.withAlpha(26),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(

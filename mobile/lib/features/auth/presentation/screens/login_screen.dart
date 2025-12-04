@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -95,18 +95,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                Text(
+                const Text(
                   'Chào mừng trở lại! ',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.black,
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   'Đăng nhập để tiếp tục dự đoán và nhận quà.',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     color: AppTheme.darkGrey,
                   ),
@@ -114,9 +114,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 40),
 
                 // Email Field
-                Text(
+                const Text(
                   'Email',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.black,
@@ -129,7 +129,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.grey.withOpacity(0.1),
+                        color: AppTheme.grey.withAlpha(26),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -170,9 +170,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 24),
 
                 // Password Field
-                Text(
+                const Text(
                   'Mật khẩu',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.black,
@@ -185,7 +185,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.grey.withOpacity(0.1),
+                        color: AppTheme.grey.withAlpha(26),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -239,9 +239,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () => context.push('/forgot-password'),
-                    child: Text(
+                    child: const Text(
                       'Quên mật khẩu?',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppTheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
@@ -259,7 +259,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.primary.withOpacity(0.3),
+                        color: AppTheme.primary.withAlpha(77),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -283,9 +283,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               strokeWidth: 2,
                             ),
                           )
-                        : Text(
+                        : const Text(
                             'Đăng Nhập',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -300,15 +300,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       'Chưa có tài khoản? ',
-                      style: const TextStyle(color: AppTheme.darkGrey),
+                      style: TextStyle(color: AppTheme.darkGrey),
                     ),
                     GestureDetector(
                       onTap: () => context.push('/register'),
-                      child: Text(
+                      child: const Text(
                         'Đăng ký ngay',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppTheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
