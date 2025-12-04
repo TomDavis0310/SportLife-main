@@ -43,6 +43,14 @@ final newsCommentsProvider = FutureProvider.family<List<dynamic>, int>((
   return ref.watch(newsApiProvider).getComments(newsId);
 });
 
+// Related News Provider
+final relatedNewsProvider = FutureProvider.family<List<News>, int>((
+  ref,
+  newsId,
+) async {
+  return ref.watch(newsApiProvider).getRelatedNews(newsId);
+});
+
 // Selected Category Provider
 final selectedNewsCategoryProvider = StateProvider<String?>((ref) => null);
 

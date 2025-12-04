@@ -53,5 +53,11 @@ class NewsApi {
     );
     return response.data['data'];
   }
+
+  Future<List<News>> getRelatedNews(int newsId) async {
+    final response = await dio.get('/news/$newsId/related');
+    final List data = response.data['data'];
+    return data.map((e) => News.fromJson(e)).toList();
+  }
 }
 

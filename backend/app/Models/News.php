@@ -56,7 +56,11 @@ class News extends Model implements HasMedia
      */
     public function getThumbnailUrlAttribute(): string
     {
-        return $this->getFirstMediaUrl('thumbnail') ?: ($this->thumbnail ?? '/images/default-news.png');
+        if ($this->getMedia('thumbnail')->isNotEmpty()) {
+            return $this->getFirstMediaUrl('thumbnail');
+        }
+
+        return $this->thumbnail ?? '/images/default-news.png';
     }
 
     /**

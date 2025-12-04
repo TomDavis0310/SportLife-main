@@ -8,7 +8,7 @@ echo ============================================
 echo.
 
 :: Set paths
-set PHP_PATH=C:\laragon\bin\php\php-8.3.16-Win32-vs16-x64\php.exe
+set PHP_PATH=C:\laragon\bin\php\php-8.3.26-Win32-vs16-x64\php.exe
 set BACKEND_PATH=%~dp0backend
 set MOBILE_PATH=%~dp0mobile
 
