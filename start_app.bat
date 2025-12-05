@@ -8,9 +8,18 @@ echo ============================================
 echo.
 
 :: Set paths
-set PHP_PATH=C:\laragon\bin\php\php-8.3.26-Win32-vs16-x64\php.exe
-set BACKEND_PATH=%~dp0backend
-set MOBILE_PATH=%~dp0mobile
+set "CONFIGURED_PHP_PATH=%PHP_PATH%"
+set "PHP_PATH="
+set "BACKEND_PATH=%~dp0backend"
+set "MOBILE_PATH=%~dp0mobile"
+
+call :ResolvePhpPath
+if not defined PHP_PATH (
+    echo      [!] Unable to locate PHP automatically.
+    echo      [!] Please set the PHP_PATH environment variable or update this script.
+    pause
+    exit /b 1
+)
 
 :: Ensure Laravel bootstrap cache directory exists and is writable
 if not exist "%BACKEND_PATH%\bootstrap\cache" (
@@ -40,11 +49,11 @@ echo.
 echo [2/6] Checking PHP...
 if not exist "%PHP_PATH%" (
     echo      [!] PHP not found at %PHP_PATH%
-    echo      [!] Please check your Laragon PHP version and update the path in this script.
+    echo      [!] Please ensure Laragon is installed or export PHP_PATH before running this script.
     pause
     exit /b 1
 )
-echo      [OK] PHP found
+echo      [OK] PHP found at %PHP_PATH%
 
 :: Setup Environment File
 echo.
@@ -193,3 +202,38 @@ echo    ALL SERVICES STARTED!
 echo ============================================
 echo.
 pause
+
+goto :EOF
+
+:ResolvePhpPath
+:: Allow pre-configured PHP path to take precedence when valid
+if defined CONFIGURED_PHP_PATH (
+    if exist "%CONFIGURED_PHP_PATH%" (
+        set "PHP_PATH=%CONFIGURED_PHP_PATH%"
+        goto :EOF
+    ) else (
+        echo      [!] PHP not found at configured path: %CONFIGURED_PHP_PATH%
+        echo      [!] Attempting to auto-detect Laragon PHP installation...
+    )
+)
+
+:: Look for the latest Laragon PHP directory automatically
+set "LARAGON_PHP_ROOT=C:\laragon\bin\php"
+if exist "%LARAGON_PHP_ROOT%" (
+    for /f "delims=" %%D in ('dir "%LARAGON_PHP_ROOT%" /b /ad ^| sort /r') do (
+        if exist "%LARAGON_PHP_ROOT%\%%D\php.exe" (
+            set "PHP_PATH=%LARAGON_PHP_ROOT%\%%D\php.exe"
+            goto :EOF
+        )
+    )
+)
+
+:: Try common PHP locations on PATH
+for %%P in (php.exe) do (
+    for /f "delims=" %%I in ('where %%P 2^>nul') do (
+        set "PHP_PATH=%%I"
+        goto :EOF
+    )
+)
+
+goto :EOF

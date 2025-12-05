@@ -93,16 +93,17 @@ class RewardController extends Controller
         // Decrease stock
         $reward->decrement('stock');
 
-        // Generate voucher code if applicable
-        $voucherCode = $reward->type === 'voucher' ? $reward->generateVoucherCode() : null;
+        // Generate voucher code for all reward types
+        $voucherCode = $reward->generateVoucherCode();
 
-        // Create redemption record
+        // Create redemption record - auto-approved
         $redemption = RewardRedemption::create([
             'user_id' => $user->id,
             'reward_id' => $reward->id,
             'voucher_code' => $voucherCode,
             'points_spent' => $reward->points_required,
-            'status' => 'pending',
+            'status' => 'approved',
+            'processed_at' => now(),
             'shipping_name' => $request->shipping_name,
             'shipping_phone' => $request->shipping_phone,
             'shipping_address' => $request->shipping_address,

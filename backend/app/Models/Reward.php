@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -52,7 +54,24 @@ class Reward extends Model implements HasMedia
      */
     public function getImageUrlAttribute(): string
     {
-        return $this->getFirstMediaUrl('image') ?: ($this->image ?? '/images/default-reward.png');
+        $mediaUrl = $this->getFirstMediaUrl('image');
+        if (!empty($mediaUrl)) {
+            return $mediaUrl;
+        }
+
+        if (empty($this->image)) {
+            return asset('images/default-reward.png');
+        }
+
+        if (Str::startsWith($this->image, ['http://', 'https://'])) {
+            return $this->image;
+        }
+
+        if (Storage::disk('public')->exists($this->image)) {
+            return Storage::disk('public')->url($this->image);
+        }
+
+        return asset('storage/' . ltrim($this->image, '/'));
     }
 
     /**
