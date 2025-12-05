@@ -74,6 +74,14 @@ class Team extends Model implements HasMedia
     }
 
     /**
+     * Team staff
+     */
+    public function staff(): HasMany
+    {
+        return $this->hasMany(TeamStaff::class);
+    }
+
+    /**
      * Active players
      */
     public function activePlayers(): HasMany
@@ -95,6 +103,17 @@ class Team extends Model implements HasMedia
     public function awayMatches(): HasMany
     {
         return $this->hasMany(FootballMatch::class, 'away_team_id');
+    }
+
+    /**
+     * All matches (Home + Away)
+     */
+    public function allMatches()
+    {
+        return FootballMatch::where(function ($query) {
+            $query->where('home_team_id', $this->id)
+                  ->orWhere('away_team_id', $this->id);
+        });
     }
 
     /**

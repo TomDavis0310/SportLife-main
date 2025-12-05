@@ -1,4 +1,6 @@
 ﻿import 'package:json_annotation/json_annotation.dart';
+import 'player.dart';
+import 'team_staff.dart';
 
 part 'team.g.dart';
 
@@ -24,7 +26,9 @@ class Team {
   @JsonKey(name: 'competition_id')
   final int? competitionId;
   @JsonKey(defaultValue: [])
-  final List<dynamic> players;
+  final List<Player> players;
+  @JsonKey(defaultValue: [])
+  final List<TeamStaff> staff;
   final Map<String, dynamic>? pivot;
 
   Team({
@@ -43,6 +47,7 @@ class Team {
     this.secondaryColor,
     this.competitionId,
     this.players = const [],
+    this.staff = const [],
     this.pivot,
   });
 

@@ -1,5 +1,6 @@
 ﻿import 'package:dio/dio.dart';
 import '../models/prediction.dart';
+import '../models/leaderboard_entry.dart';
 
 class PredictionApi {
   final Dio dio;
@@ -52,20 +53,40 @@ class PredictionApi {
     return Prediction.fromJson(response.data['data']);
   }
 
-  Future<List<Map<String, dynamic>>> getLeaderboard({
+  Future<List<LeaderboardEntry>> getLeaderboard({
     String period = 'all_time',
     int? competitionId,
     int page = 1,
   }) async {
     final response = await dio.get(
-      '/predictions/leaderboard',
+      '/leaderboard',
       queryParameters: {
         'period': period,
         if (competitionId != null) 'competition_id': competitionId,
         'page': page,
       },
     );
-    return List<Map<String, dynamic>>.from(response.data['data']);
+
+    if (response.data is! Map<String, dynamic>) {
+      throw Exception('Invalid response format');
+    }
+
+    final data = response.data['data'];
+    if (data is! List) {
+      return [];
+    }
+
+    return data.map((e) {
+      try {
+        if (e is Map) {
+          return LeaderboardEntry.fromJson(Map<String, dynamic>.from(e));
+        }
+        return null;
+      } catch (e) {
+        print('Error parsing leaderboard entry: $e');
+        return null;
+      }
+    }).whereType<LeaderboardEntry>().toList();
   }
 
   Future<Map<String, dynamic>> getMyStats() async {

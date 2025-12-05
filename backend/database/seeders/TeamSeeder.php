@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Team;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -59,6 +60,16 @@ class TeamSeeder extends Seeder
                 ['short_name' => $teamData['short_name']],
                 $teamData
             );
+        }
+
+        // Assign manager to HAGL
+        $manager = User::where('email', 'manager@hagl.vn')->first();
+        if ($manager) {
+            $hagl = Team::where('short_name', 'HAGL')->first();
+            if ($hagl) {
+                $hagl->manager_user_id = $manager->id;
+                $hagl->save();
+            }
         }
     }
 }

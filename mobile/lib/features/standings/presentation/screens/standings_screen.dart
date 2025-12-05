@@ -83,9 +83,9 @@ class StandingsScreen extends ConsumerWidget {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (team != null && team['logo_url'] != null)
+                            if (team != null && team['logo'] != null)
                               CachedNetworkImage(
-                                imageUrl: team['logo_url'],
+                                imageUrl: team['logo'],
                                 width: 24,
                                 height: 24,
                                 placeholder: (_, __) =>

@@ -17,7 +17,14 @@ class CompetitionApi {
 
   Future<List<dynamic>> getStandings(int competitionId) async {
     final response = await _dio.get('/competitions/$competitionId/standings');
-    return response.data['data'] ?? [];
+    final data = response.data['data'];
+    
+    // Backend returns { season: {...}, standings: [...] }
+    if (data is Map && data.containsKey('standings')) {
+      return data['standings'] ?? [];
+    }
+    
+    return data is List ? data : [];
   }
 
   Future<List<dynamic>> getMatches(

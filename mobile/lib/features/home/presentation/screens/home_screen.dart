@@ -238,7 +238,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return SliverAppBar(
       pinned: true,
       automaticallyImplyLeading: false,
-      expandedHeight: 240,
+      expandedHeight: 350,
       elevation: 0,
       backgroundColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(

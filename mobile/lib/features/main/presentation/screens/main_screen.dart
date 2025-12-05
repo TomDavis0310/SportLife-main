@@ -35,7 +35,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       '/main',
       '/matches',
       '/predictions',
-      if (isSponsor || isManager) '/tournaments',
+      '/competitions',
       if (isManager) '/my-team',
       if (isSponsor) '/sponsor',
       '/news',
@@ -62,12 +62,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             const Icon(Icons.analytics_rounded, color: AppTheme.primary),
         label: 'Dự Đoán',
       ),
-      if (isSponsor || isManager)
-        NavigationDestination(
-          icon: const Icon(Icons.emoji_events_rounded, color: AppTheme.grey),
-          selectedIcon: const Icon(Icons.emoji_events_rounded, color: AppTheme.primary),
-          label: 'Giải Đấu',
-        ),
+      NavigationDestination(
+        icon: const Icon(Icons.emoji_events_rounded, color: AppTheme.grey),
+        selectedIcon: const Icon(Icons.emoji_events_rounded, color: AppTheme.primary),
+        label: 'Giải Đấu',
+      ),
       if (isManager)
         NavigationDestination(
           icon: const Icon(Icons.groups_rounded, color: AppTheme.grey),

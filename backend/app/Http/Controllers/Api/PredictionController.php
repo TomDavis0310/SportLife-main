@@ -241,10 +241,32 @@ class PredictionController extends Controller
     {
         $seasonId = $request->query('season_id');
         $roundId = $request->query('round_id');
+        $period = $request->query('period');
 
         $query = PredictionLeaderboard::with('user');
 
-        if ($roundId) {
+        if ($period === 'weekly') {
+            $currentRound = Round::where('is_current', true)->first();
+            if ($currentRound) {
+                $query->where('round_id', $currentRound->id)->whereNull('season_id');
+            } else {
+                // Return empty if no current round found
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                ]);
+            }
+        } elseif ($period === 'season') {
+            $currentSeason = Season::where('is_current', true)->first();
+            if ($currentSeason) {
+                $query->where('season_id', $currentSeason->id)->whereNull('round_id');
+            } else {
+                return response()->json([
+                    'success' => true,
+                    'data' => [],
+                ]);
+            }
+        } elseif ($roundId) {
             $query->where('round_id', $roundId)->whereNull('season_id');
         } elseif ($seasonId) {
             $query->where('season_id', $seasonId)->whereNull('round_id');

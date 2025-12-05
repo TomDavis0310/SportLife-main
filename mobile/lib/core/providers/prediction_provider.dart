@@ -1,5 +1,6 @@
 ﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/predictions/data/models/prediction.dart';
+import '../../features/predictions/data/models/leaderboard_entry.dart';
 import '../../features/predictions/data/api/prediction_api.dart';
 import '../network/dio_client.dart';
 
@@ -13,18 +14,43 @@ final myPredictionsProvider = FutureProvider<List<Prediction>>((ref) async {
   return ref.watch(predictionApiProvider).getMyPredictions();
 });
 
+// Leaderboard Params
+class LeaderboardParams {
+  final String period;
+  final int? competitionId;
+  final int page;
+
+  const LeaderboardParams({
+    this.period = 'all_time',
+    this.competitionId,
+    this.page = 1,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LeaderboardParams &&
+          runtimeType == other.runtimeType &&
+          period == other.period &&
+          competitionId == other.competitionId &&
+          page == other.page;
+
+  @override
+  int get hashCode => period.hashCode ^ competitionId.hashCode ^ page.hashCode;
+}
+
 // Leaderboard Provider
 final leaderboardProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, Map<String, dynamic>>((
+    FutureProvider.family<List<LeaderboardEntry>, LeaderboardParams>((
       ref,
       params,
     ) async {
       return ref
           .watch(predictionApiProvider)
           .getLeaderboard(
-            period: params['period'] ?? 'all_time',
-            competitionId: params['competition_id'],
-            page: params['page'] ?? 1,
+            period: params.period,
+            competitionId: params.competitionId,
+            page: params.page,
           );
     });
 

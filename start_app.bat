@@ -182,11 +182,14 @@ if %errorlevel% neq 0 (
 
 echo.
 echo      - Starting Flutter app on Edge browser...
-echo      - NOTE: This window will now become the Flutter log window.
-echo      - Press 'R' to reload the app.
-echo      - Press 'q' to quit the app.
+echo      - Launching in a new window...
 echo.
 
-title SportLife Mobile - Flutter Web
-color 0E
-flutter run -d edge
+start "SportLife Mobile" cmd /k "cd /d %MOBILE_PATH% && title SportLife Mobile - Flutter Web && color 0E && flutter run -d edge"
+
+echo.
+echo ============================================
+echo    ALL SERVICES STARTED!
+echo ============================================
+echo.
+pause

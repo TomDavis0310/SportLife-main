@@ -24,6 +24,8 @@ import '../../features/rewards/presentation/screens/my_rewards_screen.dart';
 import '../../features/teams/presentation/screens/teams_screen.dart';
 import '../../features/teams/presentation/screens/team_detail_screen.dart';
 import '../../features/competitions/presentation/screens/tournaments_screen.dart';
+import '../../features/competitions/presentation/screens/competitions_screen.dart';
+import '../../features/competitions/presentation/screens/competition_detail_screen.dart';
 import '../../features/competitions/presentation/screens/sponsor_screen.dart';
 import '../../features/teams/presentation/screens/my_team_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
@@ -128,6 +130,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             MatchDetailScreen(matchId: int.parse(state.pathParameters['id']!)),
       ),
       GoRoute(
+        path: '/competition/:id',
+        builder: (context, state) => CompetitionDetailScreen(
+          competitionId: int.parse(state.pathParameters['id']!),
+          initialData: state.extra,
+        ),
+      ),
+      GoRoute(
         path: '/news/:id',
         builder: (context, state) =>
             NewsDetailScreen(newsId: int.parse(state.pathParameters['id']!)),
@@ -145,6 +154,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // Other Routes
+      GoRoute(
+        path: '/competitions',
+        builder: (context, state) => const CompetitionsScreen(),
+      ),
       GoRoute(
         path: '/leaderboard',
         builder: (context, state) => const LeaderboardScreen(),

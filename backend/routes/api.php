@@ -67,6 +67,7 @@ Route::prefix('v1')->group(function () {
     Route::get('teams', [TeamController::class, 'index']);
     Route::get('teams/{team}', [TeamController::class, 'show']);
     Route::get('teams/{team}/players', [TeamController::class, 'players']);
+    Route::get('teams/{team}/matches', [TeamController::class, 'matches']);
     Route::get('teams/{team}/upcoming', [TeamController::class, 'upcomingMatches']);
     Route::get('teams/{team}/results', [TeamController::class, 'recentResults']);
     Route::get('teams/{team}/stats', [TeamController::class, 'statistics']);
@@ -203,8 +204,12 @@ Route::prefix('v1')->group(function () {
         // Team Management (Club Managers)
         Route::prefix('my-team')->group(function () {
             Route::get('/', [TeamManagementController::class, 'getMyTeam']);
+            Route::put('/', [TeamManagementController::class, 'update']);
             Route::post('players', [TeamManagementController::class, 'addPlayer']);
+            Route::put('players/{player}', [TeamManagementController::class, 'updatePlayer']);
             Route::delete('players/{player}', [TeamManagementController::class, 'removePlayer']);
+            Route::post('staff', [TeamManagementController::class, 'addStaff']);
+            Route::delete('staff/{staff}', [TeamManagementController::class, 'removeStaff']);
         });
     });
 });

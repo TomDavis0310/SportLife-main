@@ -14,6 +14,7 @@ class LeaderboardResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'user_id' => $this->user_id,
             'rank' => $this->rank,
             'total_points' => $this->total_points,
             'total_predictions' => $this->total_predictions,
@@ -24,7 +25,7 @@ class LeaderboardResource extends JsonResource
             'season_id' => $this->season_id,
             'round_id' => $this->round_id,
             'user' => $this->when(
-                $this->relationLoaded('user'),
+                $this->relationLoaded('user') && $this->user,
                 fn () => new UserResource($this->user)
             ),
         ];

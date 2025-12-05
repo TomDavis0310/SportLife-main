@@ -19,21 +19,28 @@ class Player extends Model implements HasMedia
         'name_en',
         'nickname',
         'photo',
+        'avatar',
         'position',
         'jersey_number',
         'nationality',
         'birth_date',
+        'dob',
         'height',
         'weight',
+        'market_value',
+        'contract_until',
         'is_active',
     ];
 
     protected $casts = [
         'birth_date' => 'date',
+        'dob' => 'date',
+        'contract_until' => 'date',
         'is_active' => 'boolean',
         'jersey_number' => 'integer',
         'height' => 'integer',
         'weight' => 'integer',
+        'market_value' => 'decimal:2',
     ];
 
     /**

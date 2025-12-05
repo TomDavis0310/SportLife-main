@@ -19,6 +19,11 @@ class AppConfig {
     return 'http://127.0.0.1:8000/api/v1';
   }
 
+  static String get imageUrl {
+    final base = baseUrl;
+    return base.replaceAll('/api/v1', '');
+  }
+
   // Pusher Configuration
   static const String pusherAppId = 'your-pusher-app-id';
   static const String pusherKey = 'your-pusher-key';
