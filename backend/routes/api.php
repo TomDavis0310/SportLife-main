@@ -47,6 +47,7 @@ Route::prefix('v1')->group(function () {
     Route::get('competitions/{competition}/seasons', [CompetitionController::class, 'seasons']);
     Route::get('competitions/{competition}/standings', [CompetitionController::class, 'standings']);
     Route::get('competitions/{competition}/rounds', [CompetitionController::class, 'rounds']);
+    Route::get('competitions/{competition}/matches', [CompetitionController::class, 'matches']);
     Route::get('rounds/{round}/matches', [CompetitionController::class, 'roundMatches']);
 
     // Matches (public)

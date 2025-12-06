@@ -20,6 +20,9 @@ class RewardResource extends Resource
 
     protected static ?string $modelLabel = 'Phần thưởng';
 
+    // Ẩn khỏi Admin Panel - để Sponsor Manager quản lý
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Form $form): Form
     {
         return $form

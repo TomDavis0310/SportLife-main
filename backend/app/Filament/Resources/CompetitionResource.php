@@ -18,6 +18,9 @@ class CompetitionResource extends Resource
 
     protected static ?string $navigationGroup = 'Bóng đá';
 
+    // Ẩn khỏi Admin Panel - để Club Manager quản lý
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Form $form): Form
     {
         return $form

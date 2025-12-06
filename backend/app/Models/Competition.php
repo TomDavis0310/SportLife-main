@@ -48,11 +48,6 @@ class Competition extends Model implements HasMedia
     /**
      * Competition seasons
      */
-    public function teams(): HasMany
-    {
-        return $this->hasMany(Team::class);
-    }
-
     public function seasons(): HasMany
     {
         return $this->hasMany(Season::class);

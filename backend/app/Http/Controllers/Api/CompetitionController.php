@@ -24,7 +24,9 @@ class CompetitionController extends Controller
     public function index(): JsonResponse
     {
         $competitions = Competition::where('is_active', true)
-            ->with('seasons')
+            ->with(['seasons' => function ($q) {
+                $q->orderByDesc('start_date')->with('teams');
+            }])
             ->get();
 
         return response()->json([
@@ -34,13 +36,18 @@ class CompetitionController extends Controller
     }
 
     /**
-     * Show competition details
+     * Show competition details with full information
      */
     public function show(Competition $competition): JsonResponse
     {
-        $competition->load(['seasons' => function ($q) {
-            $q->orderByDesc('start_date');
-        }]);
+        $competition->load([
+            'seasons' => function ($q) {
+                $q->orderByDesc('start_date')
+                  ->with(['teams', 'rounds' => function($rq) {
+                      $rq->orderBy('round_number')->withCount('matches');
+                  }]);
+            },
+        ]);
 
         return response()->json([
             'success' => true,
@@ -55,6 +62,7 @@ class CompetitionController extends Controller
     {
         $seasons = $competition->seasons()
             ->orderByDesc('start_date')
+            ->with('teams')
             ->get();
 
         return response()->json([
@@ -127,6 +135,49 @@ class CompetitionController extends Controller
                 'round' => new RoundResource($round),
                 'matches' => MatchResource::collection($matches),
             ],
+        ]);
+    }
+
+    /**
+     * Get competition matches
+     */
+    public function matches(Competition $competition, Request $request): JsonResponse
+    {
+        $seasonId = $request->query('season_id');
+        $roundNumber = $request->query('round');
+        $status = $request->query('status');
+
+        // Get current season if not specified
+        $season = $seasonId
+            ? Season::findOrFail($seasonId)
+            : $competition->currentSeason->first();
+
+        if (!$season) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+            ]);
+        }
+
+        // Build query for matches
+        $query = FootballMatch::whereHas('round', function ($q) use ($season, $roundNumber) {
+            $q->where('season_id', $season->id);
+            if ($roundNumber) {
+                $q->where('round_number', $roundNumber);
+            }
+        })
+        ->with(['homeTeam', 'awayTeam', 'round'])
+        ->orderBy('match_date');
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $matches = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => MatchResource::collection($matches),
         ]);
     }
 }

@@ -21,6 +21,9 @@ class MatchResource extends Resource
 
     protected static ?string $modelLabel = 'Trận đấu';
 
+    // Ẩn khỏi Admin Panel - dữ liệu tự động từ API
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Form $form): Form
     {
         return $form

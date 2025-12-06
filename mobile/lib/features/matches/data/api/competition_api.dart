@@ -44,6 +44,21 @@ class CompetitionApi {
     return response.data['data'] ?? [];
   }
 
+  Future<List<dynamic>> getSeasons(int competitionId) async {
+    final response = await _dio.get('/competitions/$competitionId/seasons');
+    return response.data['data'] ?? [];
+  }
+
+  Future<List<dynamic>> getRounds(int competitionId, {int? seasonId}) async {
+    final response = await _dio.get(
+      '/competitions/$competitionId/rounds',
+      queryParameters: {
+        if (seasonId != null) 'season_id': seasonId,
+      },
+    );
+    return response.data['data'] ?? [];
+  }
+
   Future<List<dynamic>> getTopScorers(int competitionId) async {
     final response = await _dio.get('/competitions/$competitionId/top-scorers');
     return response.data['data'] ?? [];

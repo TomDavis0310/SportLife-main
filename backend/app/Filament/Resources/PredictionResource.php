@@ -20,6 +20,9 @@ class PredictionResource extends Resource
 
     protected static ?string $modelLabel = 'Dự đoán';
 
+    // Ẩn khỏi Admin Panel - người dùng tự quản lý
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Form $form): Form
     {
         return $form

@@ -20,6 +20,9 @@ class NewsResource extends Resource
 
     protected static ?string $modelLabel = 'Tin tức';
 
+    // Ẩn khỏi Admin Panel - để Content Manager quản lý
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Form $form): Form
     {
         return $form
