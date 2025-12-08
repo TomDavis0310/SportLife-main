@@ -66,7 +66,7 @@ class SportLifeApp extends ConsumerWidget {
 
       // Theme
       theme: AppTheme.lightTheme,
-      // // darkTheme: AppTheme.darkTheme,
+      darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
 
       // Localization

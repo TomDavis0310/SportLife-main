@@ -17,6 +17,9 @@ import '../../features/news/presentation/screens/news_detail_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/settings_screen.dart';
+import '../../features/profile/presentation/screens/profile_statistics_screen.dart';
+import '../../features/profile/presentation/screens/help_screen.dart';
+import '../../features/profile/presentation/screens/profile_progress_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/rewards/presentation/screens/rewards_screen.dart';
 import '../../features/rewards/presentation/screens/reward_detail_screen.dart';
@@ -65,7 +68,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Auth Routes
       GoRoute(
-          path: '/welcome', builder: (context, state) => const WelcomeScreen()),
+        path: '/welcome',
+        builder: (context, state) {
+          final mode = state.uri.queryParameters['mode'];
+          return WelcomeScreen(initialMode: mode);
+        },
+      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
@@ -174,6 +182,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/edit-profile',
         builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/profile/edit',
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/profile/statistics',
+        builder: (context, state) => const ProfileStatisticsScreen(),
+      ),
+      GoRoute(
+        path: '/profile/progress',
+        builder: (context, state) => const ProfileProgressScreen(),
+      ),
+      GoRoute(
+        path: '/help',
+        builder: (context, state) => const HelpScreen(),
       ),
       GoRoute(
         path: '/settings',
