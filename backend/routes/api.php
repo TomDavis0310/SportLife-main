@@ -197,6 +197,8 @@ Route::prefix('v1')->group(function () {
         Route::prefix('tournaments')->group(function () {
             Route::get('/', [TournamentController::class, 'index']);
             Route::post('/', [TournamentController::class, 'store']); // Sponsor only
+            Route::put('{competition}', [TournamentController::class, 'update']); // Sponsor only
+            Route::delete('{competition}', [TournamentController::class, 'destroy']); // Sponsor only
             Route::post('{season}/register', [TournamentController::class, 'registerTeam']); // Manager only
             Route::get('{season}/registrations', [TournamentController::class, 'getRegistrations']); // Sponsor only
             Route::post('{season}/registrations/{team}/approve', [TournamentController::class, 'approveRegistration']); // Sponsor only

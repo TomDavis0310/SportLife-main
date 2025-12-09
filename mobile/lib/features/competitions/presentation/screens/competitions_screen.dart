@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../core/providers/competition_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/widgets/error_state.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../core/theme/app_theme.dart';
+import 'edit_competition_screen.dart';
 
 class CompetitionsScreen extends ConsumerStatefulWidget {
   const CompetitionsScreen({super.key});
@@ -129,13 +131,13 @@ class _CompetitionList extends ConsumerWidget {
   }
 }
 
-class _CompetitionCard extends StatelessWidget {
+class _CompetitionCard extends ConsumerWidget {
   final dynamic competition;
 
   const _CompetitionCard({required this.competition});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final seasons = competition['seasons'] as List? ?? [];
     final currentSeason = seasons.isNotEmpty ? seasons[0] : null;
@@ -197,20 +199,61 @@ class _CompetitionCard extends StatelessWidget {
                   Positioned(
                     top: 8,
                     right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        competition['type'] == 'league' ? 'VĐQG' : 'Cúp',
-                        style: TextStyle(
-                          color: competition['type'] == 'league' ? Colors.blue : Colors.orange,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            competition['type'] == 'league' ? 'VĐQG' : 'Cúp',
+                            style: TextStyle(
+                              color: competition['type'] == 'league' ? Colors.blue : Colors.orange,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
-                      ),
+                        // Sponsor menu
+                        if (ref.watch(currentUserProvider)?.roles.contains('sponsor') == true) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: PopupMenuButton<String>(
+                              icon: const Icon(Icons.more_vert, size: 20),
+                              onSelected: (value) => _handleSponsorAction(context, ref, value, competition),
+                              itemBuilder: (context) => [
+                                const PopupMenuItem(
+                                  value: 'edit',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.edit, size: 18),
+                                      SizedBox(width: 8),
+                                      Text('Chỉnh sửa'),
+                                    ],
+                                  ),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'delete',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.delete, size: 18, color: Colors.red),
+                                      SizedBox(width: 8),
+                                      Text('Xóa', style: TextStyle(color: Colors.red)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ],
@@ -259,6 +302,74 @@ class _CompetitionCard extends StatelessWidget {
       ),
     );
   }
-}
 
+  void _handleSponsorAction(BuildContext context, WidgetRef ref, String action, dynamic competition) async {
+    switch (action) {
+      case 'edit':
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EditCompetitionScreen(competition: competition),
+          ),
+        );
+        if (result == true) {
+          // Refresh competitions list
+          ref.invalidate(competitionsProvider);
+        }
+        break;
+      case 'delete':
+        _showDeleteConfirmation(context, ref, competition);
+        break;
+    }
+  }
+
+  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, dynamic competition) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Xác nhận xóa'),
+          content: Text(
+            'Bạn có chắc chắn muốn xóa giải đấu "${competition['name']}"?\n\nHành động này không thể hoàn tác.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: () => _deleteCompetition(context, ref, competition),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Xác nhận'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteCompetition(BuildContext context, WidgetRef ref, dynamic competition) async {
+    Navigator.of(context).pop(); // Close dialog
+    
+    try {
+      await ref.read(managementCompetitionApiProvider).deleteCompetition(competition['id']);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Xóa giải đấu thành công!')),
+        );
+        // Refresh competitions list
+        ref.invalidate(competitionsProvider);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: $e')),
+        );
+      }
+    }
+  }
+}
 

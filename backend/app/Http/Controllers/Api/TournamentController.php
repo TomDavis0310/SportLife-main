@@ -124,4 +124,35 @@ class TournamentController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Team approved']);
     }
+
+    // Update competition (Sponsor only)
+    public function update(Request $request, $competitionId)
+    {
+        if (!$request->user()->hasRole('sponsor')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'type' => 'required|in:league,cup',
+        ]);
+
+        $competition = Competition::findOrFail($competitionId);
+        $competition->update($validated);
+
+        return response()->json(['success' => true, 'data' => $competition->load('seasons')]);
+    }
+
+    // Delete competition (Sponsor only)
+    public function destroy(Request $request, $competitionId)
+    {
+        if (!$request->user()->hasRole('sponsor')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $competition = Competition::findOrFail($competitionId);
+        $competition->delete();
+
+        return response()->json(['success' => true, 'message' => 'Competition deleted successfully']);
+    }
 }

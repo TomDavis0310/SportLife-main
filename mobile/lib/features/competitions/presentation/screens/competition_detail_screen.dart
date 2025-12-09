@@ -9,6 +9,7 @@ import '../../../../core/widgets/error_state.dart';
 import '../../../matches/presentation/screens/match_detail_screen.dart';
 import '../../../teams/presentation/screens/team_detail_screen.dart';
 import 'tournament_registration_screen.dart';
+import 'edit_competition_screen.dart';
 
 class CompetitionDetailScreen extends ConsumerStatefulWidget {
   final int competitionId;
@@ -155,6 +156,37 @@ class _CompetitionDetailScreenState
         ),
       ),
       actions: [
+        // Sponsor actions
+        ...ref.watch(currentUserProvider)?.roles.contains('sponsor') == true
+            ? [
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, color: Colors.white),
+                  onSelected: (value) => _handleSponsorAction(context, value, data),
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit, size: 20),
+                          SizedBox(width: 8),
+                          Text('Chỉnh sửa'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, size: 20, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Xóa', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ]
+            : [],
         IconButton(
           icon: const Icon(Icons.share_outlined, color: Colors.white),
           onPressed: () {
@@ -1641,6 +1673,74 @@ class _CompetitionDetailScreenState
       }
     } catch (e) {
       return 'N/A';
+    }
+  }
+
+  void _handleSponsorAction(BuildContext context, String action, dynamic data) async {
+    switch (action) {
+      case 'edit':
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EditCompetitionScreen(competition: data),
+          ),
+        );
+        if (result == true) {
+          // Refresh data after edit
+          ref.invalidate(competitionDetailProvider(widget.competitionId));
+        }
+        break;
+      case 'delete':
+        _showDeleteConfirmation(context, data);
+        break;
+    }
+  }
+
+  void _showDeleteConfirmation(BuildContext context, dynamic data) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Xác nhận xóa'),
+          content: Text(
+            'Bạn có chắc chắn muốn xóa giải đấu "${data['name']}"?\n\nHành động này không thể hoàn tác.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: () => _deleteCompetition(context, data),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Xác nhận'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteCompetition(BuildContext context, dynamic data) async {
+    Navigator.of(context).pop(); // Close dialog
+    
+    try {
+      await ref.read(managementCompetitionApiProvider).deleteCompetition(data['id']);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Xóa giải đấu thành công!')),
+        );
+        Navigator.of(context).pop(); // Go back to competitions list
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: $e')),
+        );
+      }
     }
   }
 }

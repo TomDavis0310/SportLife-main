@@ -40,4 +40,19 @@ class CompetitionApi {
   Future<void> approveRegistration(int seasonId, int teamId) async {
     await dio.post('/tournaments/$seasonId/registrations/$teamId/approve');
   }
+
+  Future<void> updateCompetition({
+    required int competitionId,
+    required String name,
+    required String type,
+  }) async {
+    await dio.put('/tournaments/$competitionId', data: {
+      'name': name,
+      'type': type,
+    });
+  }
+
+  Future<void> deleteCompetition(int competitionId) async {
+    await dio.delete('/tournaments/$competitionId');
+  }
 }
