@@ -25,6 +25,7 @@ class MatchResource extends JsonResource
             'status_text' => $this->status_text,
             'minute' => $this->minute,
             'venue' => $this->venue,
+            'group_name' => $this->group_name,
             'home_form' => $this->getForm($this->home_team_id),
             'away_form' => $this->getForm($this->away_team_id),
             'round_id' => $this->round_id,

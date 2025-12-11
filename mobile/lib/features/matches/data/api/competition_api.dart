@@ -33,15 +33,23 @@ class CompetitionApi {
     String? status,
     int page = 1,
   }) async {
-    final response = await _dio.get(
-      '/competitions/$competitionId/matches',
-      queryParameters: {
-        if (round != null) 'round': round,
-        if (status != null) 'status': status,
-        'page': page,
-      },
-    );
-    return response.data['data'] ?? [];
+    print('🔥 [CompetitionApi] getMatches called - competitionId: $competitionId');
+    try {
+      final response = await _dio.get(
+        '/competitions/$competitionId/matches',
+        queryParameters: {
+          if (round != null) 'round': round,
+          if (status != null) 'status': status,
+          'page': page,
+        },
+      );
+      final data = response.data['data'] ?? [];
+      print('🔥 [CompetitionApi] getMatches success - count: ${data.length}');
+      return data;
+    } catch (e) {
+      print('🔥 [CompetitionApi] getMatches ERROR: $e');
+      rethrow;
+    }
   }
 
   Future<List<dynamic>> getSeasons(int competitionId) async {

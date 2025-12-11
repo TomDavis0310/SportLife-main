@@ -61,7 +61,7 @@ class TeamController extends Controller
     {
         $players = $team->players()
             ->orderBy('position')
-            ->orderBy('shirt_number')
+            ->orderBy('jersey_number')
             ->get();
 
         return response()->json([

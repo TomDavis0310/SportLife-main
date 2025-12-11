@@ -29,6 +29,8 @@ class _CompetitionDetailScreenState
     extends ConsumerState<CompetitionDetailScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int _selectedRound = 0; // 0 = Tất cả
+  String _selectedStatus = 'all'; // all, scheduled, finished, live
 
   @override
   void initState() {
@@ -400,6 +402,10 @@ class _CompetitionDetailScreenState
     final teams = data['teams'] as List? ?? [];
     final seasons = data['seasons'] as List? ?? [];
     final currentSeason = seasons.isNotEmpty ? seasons[0] : null;
+    
+    // Check if there's any description or rules to show
+    final hasDescription = data['description'] != null || 
+        (currentSeason != null && (currentSeason['description'] != null || currentSeason['rules'] != null));
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -418,8 +424,8 @@ class _CompetitionDetailScreenState
           _buildQuickStats(context, data, teams.length),
           const SizedBox(height: 20),
 
-          // Description
-          if (data['description'] != null) ...[
+          // Description & Rules
+          if (hasDescription) ...[
             _buildDescriptionSection(context, data),
             const SizedBox(height: 20),
           ],
@@ -587,6 +593,13 @@ class _CompetitionDetailScreenState
               'Loại giải',
               data['type'] == 'league' ? 'Giải Vô Địch Quốc Gia' : 'Cúp',
             ),
+            // Round type - Hình thức thi đấu
+            if (currentSeason != null && currentSeason['round_type'] != null)
+              _buildInfoRow(
+                Icons.sports_soccer,
+                'Hình thức',
+                currentSeason['round_type_label'] ?? _getRoundTypeLabel(currentSeason['round_type']),
+              ),
             _buildInfoRow(
               Icons.public,
               'Quốc gia',
@@ -603,6 +616,50 @@ class _CompetitionDetailScreenState
                 'Trạng thái',
                 _getSeasonStatus(currentSeason),
               ),
+              // Số đội tham gia
+              _buildInfoRow(
+                Icons.groups_outlined,
+                'Số đội',
+                '${currentSeason['min_teams'] ?? 2} - ${currentSeason['max_teams'] ?? 20} đội',
+              ),
+              // Thời gian đăng ký
+              if (currentSeason['registration_start_date'] != null ||
+                  currentSeason['registration_end_date'] != null) ...[
+                _buildInfoRow(
+                  Icons.app_registration,
+                  'Đăng ký từ',
+                  _formatDate(currentSeason['registration_start_date']),
+                ),
+                _buildInfoRow(
+                  Icons.event_busy,
+                  'Đăng ký đến',
+                  _formatDate(currentSeason['registration_end_date']),
+                ),
+              ],
+              // Địa điểm
+              if (currentSeason['location'] != null &&
+                  currentSeason['location'].toString().isNotEmpty)
+                _buildInfoRow(
+                  Icons.location_on_outlined,
+                  'Địa điểm',
+                  currentSeason['location'],
+                ),
+              // Giải thưởng
+              if (currentSeason['prize'] != null &&
+                  currentSeason['prize'].toString().isNotEmpty)
+                _buildInfoRow(
+                  Icons.card_giftcard_outlined,
+                  'Giải thưởng',
+                  currentSeason['prize'],
+                ),
+              // Liên hệ
+              if (currentSeason['contact'] != null &&
+                  currentSeason['contact'].toString().isNotEmpty)
+                _buildInfoRow(
+                  Icons.contact_phone_outlined,
+                  'Liên hệ',
+                  currentSeason['contact'],
+                ),
             ],
             if (data['short_name'] != null)
               _buildInfoRow(
@@ -719,6 +776,11 @@ class _CompetitionDetailScreenState
   }
 
   Widget _buildDescriptionSection(BuildContext context, dynamic data) {
+    final seasons = data['seasons'] as List? ?? [];
+    final currentSeason = seasons.isNotEmpty ? seasons[0] : null;
+    final description = data['description'] ?? currentSeason?['description'];
+    final rules = currentSeason?['rules'];
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -752,14 +814,58 @@ class _CompetitionDetailScreenState
               ],
             ),
             const SizedBox(height: 12),
-            Text(
-              data['description'],
-              style: const TextStyle(
-                fontSize: 14,
-                height: 1.5,
-                color: AppTheme.darkGrey,
+            if (description != null && description.toString().isNotEmpty)
+              Text(
+                description,
+                style: const TextStyle(
+                  fontSize: 14,
+                  height: 1.5,
+                  color: AppTheme.darkGrey,
+                ),
               ),
-            ),
+            // Luật lệ giải đấu
+            if (rules != null && rules.toString().isNotEmpty) ...[
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.warning.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.rule,
+                        color: AppTheme.warning, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Điều lệ giải đấu',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.warning.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.warning.withOpacity(0.2)),
+                ),
+                child: Text(
+                  rules,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    height: 1.6,
+                    color: AppTheme.darkGrey,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -1032,11 +1138,7 @@ class _CompetitionDetailScreenState
       );
     }
 
-    final matchesParams = {
-      'competition_id': widget.competitionId,
-    };
-
-    final matchesAsync = ref.watch(competitionMatchesProvider(matchesParams));
+    final matchesAsync = ref.watch(simpleCompetitionMatchesProvider(widget.competitionId));
 
     return matchesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -1048,7 +1150,7 @@ class _CompetitionDetailScreenState
             const SizedBox(height: 16),
             Text('Không thể tải lịch đấu: $error'),
             ElevatedButton(
-              onPressed: () => ref.invalidate(competitionMatchesProvider),
+              onPressed: () => ref.invalidate(simpleCompetitionMatchesProvider(widget.competitionId)),
               child: const Text('Thử lại'),
             ),
           ],
@@ -1060,84 +1162,460 @@ class _CompetitionDetailScreenState
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.event_busy_outlined,
-                    size: 64, color: AppTheme.grey),
+                Icon(Icons.event_busy_outlined, size: 64, color: AppTheme.grey),
                 const SizedBox(height: 16),
                 const Text(
                   'Chưa có lịch thi đấu',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppTheme.darkGrey,
-                  ),
+                  style: TextStyle(fontSize: 16, color: AppTheme.darkGrey),
                 ),
               ],
             ),
           );
         }
 
-        // Group matches by date
-        final groupedMatches = <String, List<dynamic>>{};
+        // Get all rounds from matches with names
+        final roundsMap = <int, String>{};
         for (var match in matches) {
-          final date = match['match_date']?.split('T')[0] ?? 'unknown';
-          groupedMatches.putIfAbsent(date, () => []).add(match);
+          final roundNum = match['round']?['number'] ?? 0;
+          final roundName = match['round']?['name'] ?? 'Vòng $roundNum';
+          if (roundNum > 0 && !roundsMap.containsKey(roundNum)) {
+            roundsMap[roundNum] = roundName;
+          }
+        }
+        final sortedRounds = roundsMap.keys.toList()..sort();
+
+        // Filter matches
+        List<dynamic> filteredMatches = matches;
+        
+        // Filter by round
+        if (_selectedRound > 0) {
+          filteredMatches = filteredMatches.where((m) => 
+            m['round']?['number'] == _selectedRound
+          ).toList();
+        }
+        
+        // Filter by status
+        if (_selectedStatus != 'all') {
+          filteredMatches = filteredMatches.where((m) {
+            final status = m['status'] ?? '';
+            if (_selectedStatus == 'live') {
+              return status == 'live' || status == '1st_half' || status == '2nd_half';
+            } else if (_selectedStatus == 'finished') {
+              return status == 'finished';
+            } else if (_selectedStatus == 'scheduled') {
+              return status == 'scheduled';
+            }
+            return true;
+          }).toList();
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: groupedMatches.length,
-          itemBuilder: (context, index) {
-            final date = groupedMatches.keys.elementAt(index);
-            final dayMatches = groupedMatches[date]!;
+        // Group matches by round for display
+        final groupedByRound = <int, List<dynamic>>{};
+        for (var match in filteredMatches) {
+          final roundNum = match['round']?['number'] ?? 0;
+          groupedByRound.putIfAbsent(roundNum, () => []).add(match);
+        }
+        final sortedGroupRounds = groupedByRound.keys.toList()..sort();
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Date Header
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    _formatMatchDate(date),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.primaryDark,
+        return Column(
+          children: [
+            // Filters Section
+            _buildMatchFilters(sortedRounds, roundsMap),
+            
+            // Stats Summary
+            _buildMatchStats(matches),
+            
+            // Matches List
+            Expanded(
+              child: filteredMatches.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.filter_list_off, size: 48, color: AppTheme.grey),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Không có trận đấu phù hợp',
+                            style: TextStyle(color: AppTheme.darkGrey),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: sortedGroupRounds.length,
+                      itemBuilder: (context, index) {
+                        final roundNum = sortedGroupRounds[index];
+                        final roundMatches = groupedByRound[roundNum]!;
+                        
+                        return _buildRoundSection(context, roundNum, roundMatches);
+                      },
                     ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Matches for this date
-                ...dayMatches.map((match) => _buildMatchCard(context, match)),
-                const SizedBox(height: 8),
-              ],
-            );
-          },
+            ),
+          ],
         );
       },
     );
   }
 
-  Widget _buildMatchCard(BuildContext context, dynamic match) {
+  Widget _buildMatchFilters(List<int> rounds, Map<int, String> roundsMap) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[900] : Colors.grey[50],
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.withOpacity(0.2)),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Round Filter
+          Row(
+            children: [
+              Icon(Icons.filter_list, size: 18, color: AppTheme.primary),
+              const SizedBox(width: 8),
+              const Text('Vòng đấu:', style: TextStyle(fontWeight: FontWeight.w500)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildRoundChip('Tất cả', 0),
+                      ...rounds.map((r) => _buildRoundChip(roundsMap[r] ?? 'Vòng $r', r)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // Status Filter
+          Row(
+            children: [
+              Icon(Icons.schedule, size: 18, color: AppTheme.primary),
+              const SizedBox(width: 8),
+              const Text('Trạng thái:', style: TextStyle(fontWeight: FontWeight.w500)),
+              const SizedBox(width: 12),
+              _buildStatusChip('Tất cả', 'all', Icons.list),
+              _buildStatusChip('Sắp diễn ra', 'scheduled', Icons.access_time),
+              _buildStatusChip('Đang đấu', 'live', Icons.play_circle),
+              _buildStatusChip('Kết thúc', 'finished', Icons.check_circle),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRoundChip(String label, int roundNum) {
+    final isSelected = _selectedRound == roundNum;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: InkWell(
+        onTap: () => setState(() => _selectedRound = roundNum),
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? AppTheme.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? AppTheme.primary : Colors.grey.withOpacity(0.3),
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? Colors.white : null,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(String label, String status, IconData icon) {
+    final isSelected = _selectedStatus == status;
+    Color chipColor;
+    switch (status) {
+      case 'live':
+        chipColor = AppTheme.live;
+        break;
+      case 'finished':
+        chipColor = AppTheme.finished;
+        break;
+      case 'scheduled':
+        chipColor = AppTheme.scheduled;
+        break;
+      default:
+        chipColor = AppTheme.primary;
+    }
+    
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: InkWell(
+        onTap: () => setState(() => _selectedStatus = status),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: isSelected ? chipColor.withOpacity(0.15) : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected ? chipColor : Colors.grey.withOpacity(0.3),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: isSelected ? chipColor : Colors.grey),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? chipColor : null,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMatchStats(List<dynamic> matches) {
+    int total = matches.length;
+    int scheduled = matches.where((m) => m['status'] == 'scheduled').length;
+    int finished = matches.where((m) => m['status'] == 'finished').length;
+    int live = matches.where((m) => 
+      m['status'] == 'live' || m['status'] == '1st_half' || m['status'] == '2nd_half'
+    ).length;
+
+    return Container(
+      margin: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.primary.withOpacity(0.1), AppTheme.primary.withOpacity(0.05)],
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem('Tổng', total, Icons.sports_soccer, AppTheme.primary),
+          Container(height: 30, width: 1, color: Colors.grey.withOpacity(0.3)),
+          _buildStatItem('Sắp đấu', scheduled, Icons.schedule, AppTheme.scheduled),
+          Container(height: 30, width: 1, color: Colors.grey.withOpacity(0.3)),
+          _buildStatItem('Đang đấu', live, Icons.play_circle_fill, AppTheme.live),
+          Container(height: 30, width: 1, color: Colors.grey.withOpacity(0.3)),
+          _buildStatItem('Kết thúc', finished, Icons.check_circle, AppTheme.finished),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, int count, IconData icon, Color color) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 4),
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRoundSection(BuildContext context, int roundNum, List<dynamic> matches) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Get round name from first match
+    final roundName = matches.isNotEmpty 
+        ? (matches.first['round']?['name'] ?? 'Vòng $roundNum')
+        : 'Vòng $roundNum';
+    
+    // Sort matches by date
+    matches.sort((a, b) {
+      final dateA = a['match_date'] ?? '';
+      final dateB = b['match_date'] ?? '';
+      return dateA.compareTo(dateB);
+    });
+    
+    // Group by date within round
+    final groupedByDate = <String, List<dynamic>>{};
+    for (var match in matches) {
+      final date = match['match_date']?.split('T')[0] ?? 'unknown';
+      groupedByDate.putIfAbsent(date, () => []).add(match);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Round Header
+        Container(
+          margin: const EdgeInsets.only(top: 16, bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppTheme.primary, AppTheme.primary.withOpacity(0.7)],
+            ),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primary.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.emoji_events, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Text(
+                roundName,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${matches.length} trận',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        // Matches grouped by date
+        ...groupedByDate.entries.map((entry) {
+          // Group by group_name within date
+          final matchesByGroup = <String, List<dynamic>>{};
+          for (var match in entry.value) {
+            final groupName = match['group_name'] ?? '';
+            matchesByGroup.putIfAbsent(groupName, () => []).add(match);
+          }
+          
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date sub-header
+              Padding(
+                padding: const EdgeInsets.only(left: 8, top: 8, bottom: 6),
+                child: Row(
+                  children: [
+                    Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
+                    const SizedBox(width: 6),
+                    Text(
+                      _formatMatchDate(entry.key),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.grey[400] : Colors.grey[700],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Match cards grouped by group_name
+              ...matchesByGroup.entries.map((groupEntry) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (groupEntry.key.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8, top: 4, bottom: 4),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: groupEntry.key == 'Bảng A' 
+                                ? Colors.blue.withOpacity(0.1) 
+                                : Colors.green.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: groupEntry.key == 'Bảng A' 
+                                  ? Colors.blue.withOpacity(0.3) 
+                                  : Colors.green.withOpacity(0.3),
+                            ),
+                          ),
+                          child: Text(
+                            groupEntry.key,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: groupEntry.key == 'Bảng A' ? Colors.blue : Colors.green,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ...groupEntry.value.map((match) => _buildCompactMatchCard(context, match)),
+                  ],
+                );
+              }),
+            ],
+          );
+        }),
+        
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _buildCompactMatchCard(BuildContext context, dynamic match) {
     final homeTeam = match['home_team'] ?? {};
     final awayTeam = match['away_team'] ?? {};
     final status = match['status'] ?? 'scheduled';
     final isLive = status == 'live' || status == '1st_half' || status == '2nd_half';
     final isFinished = status == 'finished';
 
+    Color statusColor = AppTheme.scheduled;
+    if (isLive) statusColor = AppTheme.live;
+    if (isFinished) statusColor = AppTheme.finished;
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 8),
+      elevation: isLive ? 3 : 1,
+      shadowColor: isLive ? AppTheme.live.withOpacity(0.5) : null,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isLive
-              ? AppTheme.live.withOpacity(0.5)
-              : AppTheme.lightGrey.withOpacity(0.5),
-          width: isLive ? 2 : 1,
+          color: isLive ? AppTheme.live : Colors.transparent,
+          width: isLive ? 2 : 0,
         ),
       ),
       child: InkWell(
@@ -1151,106 +1629,128 @@ class _CompetitionDetailScreenState
             );
           }
         },
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: Column(
+          child: Row(
             children: [
-              // Match Status
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildMatchStatus(status, match['minute']),
-                  if (match['venue'] != null)
-                    Row(
-                      children: [
-                        const Icon(Icons.stadium_outlined,
-                            size: 12, color: AppTheme.grey),
-                        const SizedBox(width: 4),
-                        Text(
-                          match['venue'],
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppTheme.darkGrey,
-                          ),
+              // Home Team
+              Expanded(
+                flex: 3,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        homeTeam['short_name'] ?? homeTeam['name'] ?? 'Home',
+                        style: TextStyle(
+                          fontWeight: isFinished && (match['home_score'] ?? 0) > (match['away_score'] ?? 0) 
+                            ? FontWeight.bold : FontWeight.w500,
+                          fontSize: 13,
                         ),
-                      ],
+                        textAlign: TextAlign.right,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                ],
+                    const SizedBox(width: 8),
+                    _buildSmallTeamLogo(homeTeam['logo'], homeTeam['name']),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
-              // Teams and Score
-              Row(
-                children: [
-                  // Home Team
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _buildTeamLogo(homeTeam['logo'], homeTeam['name']),
-                        const SizedBox(height: 8),
-                        Text(
-                          homeTeam['name'] ?? 'Home',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+              
+              // Score / Time
+              Container(
+                width: 80,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    if (isLive)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        margin: const EdgeInsets.only(bottom: 4),
+                        decoration: BoxDecoration(
+                          color: AppTheme.live,
+                          borderRadius: BorderRadius.circular(4),
                         ),
-                      ],
-                    ),
-                  ),
-                  // Score
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isLive
-                          ? AppTheme.live.withOpacity(0.1)
-                          : (isFinished
-                              ? AppTheme.finished.withOpacity(0.1)
-                              : AppTheme.scheduled.withOpacity(0.1)),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: isFinished || isLive
-                        ? Text(
-                            '${match['home_score'] ?? 0} - ${match['away_score'] ?? 0}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: isLive ? AppTheme.live : AppTheme.black,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          )
-                        : Text(
-                            _formatMatchTime(match['match_date']),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.scheduled,
+                            const SizedBox(width: 4),
+                            Text(
+                              match['minute'] != null ? "${match['minute']}'" : 'LIVE',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                  ),
-                  // Away Team
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _buildTeamLogo(awayTeam['logo'], awayTeam['name']),
-                        const SizedBox(height: 8),
-                        Text(
-                          awayTeam['name'] ?? 'Away',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                          ],
                         ),
-                      ],
+                      ),
+                    Text(
+                      isFinished || isLive
+                          ? '${match['home_score'] ?? 0} - ${match['away_score'] ?? 0}'
+                          : _formatMatchTime(match['match_date']),
+                      style: TextStyle(
+                        fontSize: isFinished || isLive ? 18 : 14,
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                      ),
                     ),
-                  ),
-                ],
+                    if (!isLive && !isFinished)
+                      Text(
+                        'Sắp diễn ra',
+                        style: TextStyle(
+                          fontSize: 9,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    if (isFinished)
+                      Text(
+                        'Kết thúc',
+                        style: TextStyle(
+                          fontSize: 9,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              
+              // Away Team
+              Expanded(
+                flex: 3,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    _buildSmallTeamLogo(awayTeam['logo'], awayTeam['name']),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        awayTeam['short_name'] ?? awayTeam['name'] ?? 'Away',
+                        style: TextStyle(
+                          fontWeight: isFinished && (match['away_score'] ?? 0) > (match['home_score'] ?? 0) 
+                            ? FontWeight.bold : FontWeight.w500,
+                          fontSize: 13,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1259,102 +1759,43 @@ class _CompetitionDetailScreenState
     );
   }
 
-  Widget _buildTeamLogo(String? logoUrl, String? teamName) {
+  Widget _buildSmallTeamLogo(String? logoUrl, String? teamName) {
     return Container(
-      width: 48,
-      height: 48,
+      width: 32,
+      height: 32,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
+            blurRadius: 4,
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: logoUrl != null
+        borderRadius: BorderRadius.circular(8),
+        child: logoUrl != null && logoUrl.isNotEmpty
             ? CachedNetworkImage(
-                imageUrl: logoUrl,
+                imageUrl: logoUrl.startsWith('http') ? logoUrl : 'http://127.0.0.1:8000$logoUrl',
                 fit: BoxFit.contain,
-                placeholder: (_, __) => const Icon(Icons.sports_soccer),
-                errorWidget: (_, __, ___) => const Icon(Icons.sports_soccer),
+                placeholder: (_, __) => _buildTeamInitial(teamName),
+                errorWidget: (_, __, ___) => _buildTeamInitial(teamName),
               )
-            : Center(
-                child: Text(
-                  teamName?[0] ?? '?',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
-                  ),
-                ),
-              ),
+            : _buildTeamInitial(teamName),
       ),
     );
   }
 
-  Widget _buildMatchStatus(String status, dynamic minute) {
-    Color color;
-    String label;
-    bool showPulse = false;
-
-    switch (status) {
-      case 'live':
-      case '1st_half':
-      case '2nd_half':
-        color = AppTheme.live;
-        label = minute != null ? '$minute\'' : 'LIVE';
-        showPulse = true;
-        break;
-      case 'halftime':
-        color = AppTheme.warning;
-        label = 'HT';
-        break;
-      case 'finished':
-        color = AppTheme.finished;
-        label = 'KT';
-        break;
-      case 'postponed':
-        color = AppTheme.error;
-        label = 'Hoãn';
-        break;
-      default:
-        color = AppTheme.scheduled;
-        label = 'Sắp diễn ra';
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (showPulse) ...[
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
+  Widget _buildTeamInitial(String? name) {
+    return Center(
+      child: Text(
+        name?.isNotEmpty == true ? name![0].toUpperCase() : '?',
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: AppTheme.primary,
+        ),
       ),
     );
   }
@@ -1641,6 +2082,23 @@ class _CompetitionDetailScreenState
       }
     } catch (e) {
       return 'N/A';
+    }
+  }
+
+  String _getRoundTypeLabel(String? roundType) {
+    switch (roundType) {
+      case 'round_robin':
+        return 'Vòng tròn';
+      case 'group_stage':
+        return 'Vòng bảng';
+      case 'knockout':
+        return 'Loại trực tiếp';
+      case 'league':
+        return 'Giải vô địch';
+      case 'mixed':
+        return 'Kết hợp (Bảng + Loại)';
+      default:
+        return 'Vòng tròn';
     }
   }
 }

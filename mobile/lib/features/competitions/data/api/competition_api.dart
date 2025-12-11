@@ -17,6 +17,16 @@ class CompetitionApi {
     required String seasonName,
     required String startDate,
     required String endDate,
+    String? roundType,
+    int? maxTeams,
+    int? minTeams,
+    String? registrationStartDate,
+    String? registrationEndDate,
+    String? description,
+    String? location,
+    String? prize,
+    String? rules,
+    String? contact,
   }) async {
     await dio.post('/tournaments', data: {
       'name': name,
@@ -24,6 +34,16 @@ class CompetitionApi {
       'season_name': seasonName,
       'start_date': startDate,
       'end_date': endDate,
+      if (roundType != null) 'round_type': roundType,
+      if (maxTeams != null) 'max_teams': maxTeams,
+      if (minTeams != null) 'min_teams': minTeams,
+      if (registrationStartDate != null) 'registration_start_date': registrationStartDate,
+      if (registrationEndDate != null) 'registration_end_date': registrationEndDate,
+      if (description != null) 'description': description,
+      if (location != null) 'location': location,
+      if (prize != null) 'prize': prize,
+      if (rules != null) 'rules': rules,
+      if (contact != null) 'contact': contact,
     });
   }
 

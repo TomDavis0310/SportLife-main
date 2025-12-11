@@ -18,12 +18,30 @@ class Season extends Model
         'start_date',
         'end_date',
         'is_current',
+        'format',
+        'round_type',
+        'max_teams',
+        'min_teams',
+        'registration_start_date',
+        'registration_end_date',
+        'registration_locked',
+        'sponsor_user_id',
+        'description',
+        'location',
+        'prize',
+        'rules',
+        'contact',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'registration_start_date' => 'date',
+        'registration_end_date' => 'date',
         'is_current' => 'boolean',
+        'registration_locked' => 'boolean',
+        'max_teams' => 'integer',
+        'min_teams' => 'integer',
     ];
 
     /**
@@ -92,5 +110,37 @@ class Season extends Model
     public function getIsActiveAttribute(): bool
     {
         return $this->start_date <= now() && $this->end_date >= now();
+    }
+
+    /**
+     * Sponsor who created/manages this season
+     */
+    public function sponsor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sponsor_user_id');
+    }
+
+    /**
+     * Get approved teams count
+     */
+    public function getApprovedTeamsCountAttribute(): int
+    {
+        return $this->teams()->wherePivot('status', 'approved')->count();
+    }
+
+    /**
+     * Check if registration is full
+     */
+    public function getIsRegistrationFullAttribute(): bool
+    {
+        return $this->approved_teams_count >= $this->max_teams;
+    }
+
+    /**
+     * Check if can still register
+     */
+    public function getCanRegisterAttribute(): bool
+    {
+        return !$this->registration_locked && !$this->is_registration_full;
     }
 }

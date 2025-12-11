@@ -13,9 +13,11 @@ class SponsorScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final competitionsAsync = ref.watch(managedCompetitionsProvider);
     final user = ref.watch(currentUserProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: isDark ? colorScheme.surface : Colors.grey[100],
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -88,7 +90,7 @@ class SponsorScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: _buildDashboardSummary(competitionsAsync),
+              child: _buildDashboardSummary(context, competitionsAsync),
             ),
           ),
           competitionsAsync.when(
@@ -99,12 +101,15 @@ class SponsorScreen extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.emoji_events_outlined,
-                            size: 64, color: Colors.grey),
+                        Icon(Icons.emoji_events_outlined,
+                            size: 64, color: isDark ? Colors.grey[600] : Colors.grey),
                         const SizedBox(height: 16),
-                        const Text(
+                        Text(
                           'Bạn chưa có giải đấu nào',
-                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                          style: TextStyle(
+                            fontSize: 18, 
+                            color: isDark ? Colors.grey[400] : Colors.grey[600],
+                          ),
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton.icon(
@@ -142,11 +147,12 @@ class SponsorScreen extends ConsumerWidget {
         label: const Text('Tạo giải đấu'),
         icon: const Icon(Icons.add),
         backgroundColor: AppTheme.primary,
+        foregroundColor: Colors.white,
       ),
     );
   }
 
-  Widget _buildDashboardSummary(AsyncValue<List<dynamic>> competitionsAsync) {
+  Widget _buildDashboardSummary(BuildContext context, AsyncValue<List<dynamic>> competitionsAsync) {
     return competitionsAsync.maybeWhen(
       data: (competitions) {
         int totalTournaments = competitions.length;
@@ -184,7 +190,7 @@ class SponsorScreen extends ConsumerWidget {
       MaterialPageRoute(builder: (context) => const CreateCompetitionScreen()),
     );
     if (result == true) {
-      ref.refresh(managedCompetitionsProvider);
+      ref.invalidate(managedCompetitionsProvider);
     }
   }
 }
@@ -204,12 +210,15 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? colorScheme.surfaceContainerHighest : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
+        boxShadow: isDark ? null : [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
@@ -224,16 +233,18 @@ class _SummaryCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
+              color: isDark ? colorScheme.onSurface : Colors.black87,
             ),
           ),
           Text(
             title,
             style: TextStyle(
-              color: Colors.grey[600],
+              color: isDark ? colorScheme.onSurfaceVariant : Colors.grey[700],
               fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -252,13 +263,15 @@ class _CompetitionCard extends ConsumerWidget {
     final currentSeason = (competition['seasons'] as List).isNotEmpty
         ? competition['seasons'][0]
         : null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? colorScheme.surfaceContainerHighest : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        boxShadow: isDark ? null : [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
@@ -271,9 +284,11 @@ class _CompetitionCard extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? colorScheme.surfaceContainerHighest : Colors.white,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              border: Border(bottom: BorderSide(color: Colors.grey[100]!)),
+              border: Border(bottom: BorderSide(
+                color: isDark ? colorScheme.outlineVariant : Colors.grey[200]!,
+              )),
             ),
             child: Row(
               children: [
@@ -281,7 +296,7 @@ class _CompetitionCard extends ConsumerWidget {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.1),
+                    color: AppTheme.primary.withOpacity(isDark ? 0.2 : 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.emoji_events, color: AppTheme.primary),
@@ -293,16 +308,20 @@ class _CompetitionCard extends ConsumerWidget {
                     children: [
                       Text(
                         competition['name'],
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: isDark ? colorScheme.onSurface : Colors.black87,
                         ),
                       ),
                       Text(
                         competition['type'] == 'league'
                             ? 'Giải Vô Địch Quốc Gia'
                             : 'Cúp Quốc Gia',
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: TextStyle(
+                          color: isDark ? colorScheme.onSurfaceVariant : Colors.grey[700],
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
@@ -348,9 +367,10 @@ class _CompetitionCard extends ConsumerWidget {
                     children: [
                       Text(
                         'Mùa giải: ${currentSeason['name']}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
+                          color: isDark ? colorScheme.onSurface : Colors.black87,
                         ),
                       ),
                       Container(
@@ -372,6 +392,7 @@ class _CompetitionCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   _buildInfoRow(
+                    context,
                     Icons.groups,
                     'Số đội đăng ký',
                     '${currentSeason['teams_count'] ?? 0}',
@@ -428,7 +449,10 @@ class _CompetitionCard extends ConsumerWidget {
               child: Center(
                 child: Text(
                   'Chưa có mùa giải nào',
-                  style: TextStyle(color: Colors.grey[500]),
+                  style: TextStyle(
+                    color: isDark ? colorScheme.onSurfaceVariant : Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
@@ -437,16 +461,25 @@ class _CompetitionCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
+        Icon(icon, size: 20, color: isDark ? colorScheme.onSurfaceVariant : Colors.grey[700]),
         const SizedBox(width: 8),
-        Text(label, style: TextStyle(color: Colors.grey[600])),
+        Text(label, style: TextStyle(
+          color: isDark ? colorScheme.onSurfaceVariant : Colors.grey[700],
+          fontWeight: FontWeight.w500,
+        )),
         const Spacer(),
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? colorScheme.onSurface : Colors.black87,
+          ),
         ),
       ],
     );
@@ -483,11 +516,13 @@ class _RegistrationsList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final registrationsFuture =
         ref.watch(managementCompetitionApiProvider).getRegistrations(seasonId);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: isDark ? colorScheme.surface : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         children: [
@@ -496,7 +531,7 @@ class _RegistrationsList extends ConsumerWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: isDark ? colorScheme.outlineVariant : Colors.grey[300],
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -509,16 +544,18 @@ class _RegistrationsList extends ConsumerWidget {
                   'Danh sách đăng ký',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: isDark ? colorScheme.onSurface : Colors.black87,
                       ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: Icon(Icons.close, 
+                    color: isDark ? colorScheme.onSurface : Colors.black87),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
           ),
-          const Divider(),
+          Divider(color: isDark ? colorScheme.outlineVariant : Colors.grey[300]),
           Expanded(
             child: FutureBuilder(
               future: registrationsFuture,
@@ -533,12 +570,13 @@ class _RegistrationsList extends ConsumerWidget {
                       children: [
                         const Icon(Icons.error_outline, color: Colors.red, size: 48),
                         const SizedBox(height: 16),
-                        Text('Lỗi: ${snapshot.error}'),
+                        Text('Lỗi: ${snapshot.error}',
+                          style: TextStyle(
+                            color: isDark ? colorScheme.onSurface : Colors.black87,
+                          ),
+                        ),
                         TextButton(
-                          onPressed: () {
-                            // Trigger rebuild
-                            // In a real app, use a proper provider refresh
-                          },
+                          onPressed: () {},
                           child: const Text('Thử lại'),
                         ),
                       ],
@@ -554,11 +592,14 @@ class _RegistrationsList extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.group_off_outlined,
-                            size: 64, color: Colors.grey[300]),
+                            size: 64, 
+                            color: isDark ? colorScheme.onSurfaceVariant : Colors.grey[300]),
                         const SizedBox(height: 16),
                         Text(
                           'Chưa có đội nào đăng ký',
-                          style: TextStyle(color: Colors.grey[500]),
+                          style: TextStyle(
+                            color: isDark ? colorScheme.onSurfaceVariant : Colors.grey[500],
+                          ),
                         ),
                       ],
                     ),
@@ -576,25 +617,31 @@ class _RegistrationsList extends ConsumerWidget {
 
                     return Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.grey[200]!),
+                        color: isDark ? colorScheme.surfaceContainerHighest : Colors.white,
+                        border: Border.all(
+                          color: isDark ? colorScheme.outlineVariant : Colors.grey[200]!,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: ListTile(
                         contentPadding: const EdgeInsets.all(12),
                         leading: CircleAvatar(
                           radius: 24,
-                          backgroundColor: Colors.grey[100],
+                          backgroundColor: isDark ? colorScheme.surfaceContainerHigh : Colors.grey[100],
                           backgroundImage: team.logo != null
                               ? NetworkImage(team.logo!)
                               : null,
                           child: team.logo == null
-                              ? const Icon(Icons.shield, color: Colors.grey)
+                              ? Icon(Icons.shield, 
+                                  color: isDark ? colorScheme.onSurfaceVariant : Colors.grey)
                               : null,
                         ),
                         title: Text(
                           team.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? colorScheme.onSurface : Colors.black87,
+                          ),
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

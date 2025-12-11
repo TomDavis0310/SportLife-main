@@ -17,6 +17,7 @@ class FootballMatch extends Model
 
     protected $fillable = [
         'round_id',
+        'group_name',
         'home_team_id',
         'away_team_id',
         'home_score',
