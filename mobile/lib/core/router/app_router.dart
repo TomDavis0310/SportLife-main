@@ -133,6 +133,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: ProfileScreen()),
           ),
+          GoRoute(
+            path: '/competitions',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: CompetitionsScreen()),
+          ),
         ],
       ),
 
@@ -181,12 +186,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => RewardDetailScreen(
           rewardId: int.parse(state.pathParameters['id']!),
         ),
-      ),
-
-      // Other Routes
-      GoRoute(
-        path: '/competitions',
-        builder: (context, state) => const CompetitionsScreen(),
       ),
       GoRoute(
         path: '/leaderboard',

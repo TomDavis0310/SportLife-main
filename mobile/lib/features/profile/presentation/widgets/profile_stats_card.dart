@@ -15,13 +15,15 @@ class ProfileStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.getColors(context);
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.card,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -145,22 +147,32 @@ class ProfileStatsCard extends StatelessWidget {
             color: color,
           ),
         ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppTheme.darkGrey,
-          ),
+        Builder(
+          builder: (context) {
+            final colors = AppTheme.getColors(context);
+            return Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: colors.textSecondary,
+              ),
+            );
+          },
         ),
       ],
     );
   }
 
   Widget _buildVerticalDivider() {
-    return Container(
-      height: 60,
-      width: 1,
-      color: AppTheme.lightGrey,
+    return Builder(
+      builder: (context) {
+        final colors = AppTheme.getColors(context);
+        return Container(
+          height: 60,
+          width: 1,
+          color: colors.divider,
+        );
+      },
     );
   }
 
@@ -189,16 +201,21 @@ class ProfileStatsCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: LinearProgressIndicator(
-            value: accuracy / 100,
-            minHeight: 10,
-            backgroundColor: AppTheme.lightGrey,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              _getAccuracyColor(accuracy),
-            ),
-          ),
+        Builder(
+          builder: (context) {
+            final colors = AppTheme.getColors(context);
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: accuracy / 100,
+                minHeight: 10,
+                backgroundColor: colors.divider,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  _getAccuracyColor(accuracy),
+                ),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -234,13 +251,18 @@ class ProfileStatsCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: AppTheme.darkGrey,
-          ),
-          textAlign: TextAlign.center,
+        Builder(
+          builder: (context) {
+            final colors = AppTheme.getColors(context);
+            return Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: colors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            );
+          },
         ),
       ],
     );

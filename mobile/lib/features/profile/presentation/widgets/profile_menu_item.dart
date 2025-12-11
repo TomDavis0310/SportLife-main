@@ -28,6 +28,8 @@ class ProfileMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.getColors(context);
+    
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -62,7 +64,7 @@ class ProfileMenuItem extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: AppTheme.accent,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: colors.card, width: 2),
                         ),
                         constraints: const BoxConstraints(
                           minWidth: 20,
@@ -92,7 +94,7 @@ class ProfileMenuItem extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: textColor ?? AppTheme.black,
+                        color: textColor ?? colors.textPrimary,
                       ),
                     ),
                     if (subtitle != null) ...[
@@ -101,7 +103,7 @@ class ProfileMenuItem extends StatelessWidget {
                         subtitle!,
                         style: TextStyle(
                           fontSize: 13,
-                          color: AppTheme.darkGrey,
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
@@ -112,7 +114,7 @@ class ProfileMenuItem extends StatelessWidget {
               trailing ??
                   Icon(
                     Icons.chevron_right,
-                    color: AppTheme.grey,
+                    color: colors.textHint,
                     size: 24,
                   ),
             ],
@@ -135,14 +137,16 @@ class ProfileMenuSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppTheme.getColors(context);
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.card,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: colors.shadow,
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -156,7 +160,7 @@ class ProfileMenuSection extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
               child: Text(
                 title!,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.primary,
@@ -175,7 +179,7 @@ class ProfileMenuSection extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Divider(
                       height: 1,
-                      color: AppTheme.lightGrey.withOpacity(0.5),
+                      color: colors.divider,
                     ),
                   ),
               ],

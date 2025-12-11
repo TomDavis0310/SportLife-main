@@ -12,6 +12,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
+    final colors = AppTheme.getColors(context);
 
     if (user == null) {
       return Scaffold(
@@ -20,7 +21,7 @@ class ProfileScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: colors.background,
       body: RefreshIndicator(
         onRefresh: () async {
           await ref.read(authStateProvider.notifier).refreshProfile();
