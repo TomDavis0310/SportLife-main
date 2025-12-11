@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\PredictionResource;
 use App\Http\Resources\LeaderboardResource;
 use App\Models\FootballMatch;
-use App\Models\Player;
 use App\Models\Prediction;
 use App\Models\PredictionLeaderboard;
 use App\Models\Season;
@@ -22,7 +21,7 @@ class PredictionController extends Controller
     public function index(Request $request): JsonResponse
     {
         $predictions = Prediction::where('user_id', $request->user()->id)
-            ->with(['match.homeTeam', 'match.awayTeam', 'match.round.season.competition', 'firstScorer'])
+            ->with(['match.homeTeam', 'match.awayTeam', 'match.round.season.competition'])
             ->orderByDesc('created_at')
             ->paginate(20);
 
@@ -44,23 +43,8 @@ class PredictionController extends Controller
     {
         $request->validate([
             'match_id' => 'required|exists:matches,id',
-            'home_score' => 'nullable|integer|min:0|max:20|required_without:predicted_home_score',
-            'away_score' => 'nullable|integer|min:0|max:20|required_without:predicted_away_score',
-            'predicted_home_score' => 'nullable|integer|min:0|max:20|required_without:home_score',
-            'predicted_away_score' => 'nullable|integer|min:0|max:20|required_without:away_score',
-            'first_scorer_id' => 'nullable|exists:players,id',
+            'predicted_outcome' => 'required|in:home,draw,away',
         ]);
-
-        // Support both field names
-        $homeScore = $request->home_score ?? $request->predicted_home_score;
-        $awayScore = $request->away_score ?? $request->predicted_away_score;
-
-        if ($homeScore === null || $awayScore === null) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Home and away scores are required',
-            ], 422);
-        }
 
         $match = FootballMatch::findOrFail($request->match_id);
 
@@ -84,20 +68,9 @@ class PredictionController extends Controller
             ], 422);
         }
 
-        // Validate first scorer belongs to one of the teams
-        if ($request->first_scorer_id) {
-            $player = Player::find($request->first_scorer_id);
-            if (!$player || !in_array($player->team_id, [$match->home_team_id, $match->away_team_id])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'First scorer must be from one of the playing teams',
-                ], 422);
-            }
-        }
-
         // Calculate streak multiplier
         $user = $request->user();
-        $streak = $user->prediction_streak;
+        $streak = $user->prediction_streak ?? 0;
         $multiplier = 1.0;
         if ($streak >= 10) {
             $multiplier = 3.0;
@@ -110,13 +83,11 @@ class PredictionController extends Controller
         $prediction = Prediction::create([
             'user_id' => $user->id,
             'match_id' => $match->id,
-            'home_score' => $homeScore,
-            'away_score' => $awayScore,
-            'first_scorer_id' => $request->first_scorer_id,
+            'predicted_outcome' => $request->predicted_outcome,
             'streak_multiplier' => $multiplier,
         ]);
 
-        $prediction->load(['match.homeTeam', 'match.awayTeam', 'firstScorer']);
+        $prediction->load(['match.homeTeam', 'match.awayTeam']);
 
         return response()->json([
             'success' => true,
@@ -147,41 +118,14 @@ class PredictionController extends Controller
         }
 
         $request->validate([
-            'home_score' => 'nullable|integer|min:0|max:20|required_without:predicted_home_score',
-            'away_score' => 'nullable|integer|min:0|max:20|required_without:predicted_away_score',
-            'predicted_home_score' => 'nullable|integer|min:0|max:20|required_without:home_score',
-            'predicted_away_score' => 'nullable|integer|min:0|max:20|required_without:away_score',
-            'first_scorer_id' => 'nullable|exists:players,id',
+            'predicted_outcome' => 'required|in:home,draw,away',
         ]);
-
-        // Validate first scorer
-        if ($request->first_scorer_id) {
-            $player = Player::find($request->first_scorer_id);
-            if (!$player || !in_array($player->team_id, [$prediction->match->home_team_id, $prediction->match->away_team_id])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'First scorer must be from one of the playing teams',
-                ], 422);
-            }
-        }
-
-        $homeScore = $request->home_score ?? $request->predicted_home_score;
-        $awayScore = $request->away_score ?? $request->predicted_away_score;
-
-        if ($homeScore === null || $awayScore === null) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Home and away scores are required',
-            ], 422);
-        }
 
         $prediction->update([
-            'home_score' => $homeScore,
-            'away_score' => $awayScore,
-            'first_scorer_id' => $request->first_scorer_id,
+            'predicted_outcome' => $request->predicted_outcome,
         ]);
 
-        $prediction->load(['match.homeTeam', 'match.awayTeam', 'firstScorer']);
+        $prediction->load(['match.homeTeam', 'match.awayTeam']);
 
         return response()->json([
             'success' => true,
@@ -203,7 +147,7 @@ class PredictionController extends Controller
             ], 403);
         }
 
-        $prediction->load(['match.homeTeam', 'match.awayTeam', 'firstScorer', 'user']);
+        $prediction->load(['match.homeTeam', 'match.awayTeam', 'user']);
 
         return response()->json([
             'success' => true,
@@ -224,7 +168,7 @@ class PredictionController extends Controller
         }
 
         $predictions = $match->predictions()
-            ->with(['user', 'firstScorer'])
+            ->with(['user'])
             ->orderByDesc('points_earned')
             ->paginate(50);
 

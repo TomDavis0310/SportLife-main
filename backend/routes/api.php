@@ -17,6 +17,9 @@ use App\Http\Controllers\Api\SponsorController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TournamentController;
 use App\Http\Controllers\Api\TeamManagementController;
+use App\Http\Controllers\Api\JournalistController;
+use App\Http\Controllers\Api\ChampionPredictionController;
+use App\Http\Controllers\Api\MatchSchedulingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -133,6 +136,22 @@ Route::prefix('v1')->group(function () {
         Route::get('matches/{match}/prediction', [MatchController::class, 'userPrediction']);
         Route::get('matches/{match}/predictions', [PredictionController::class, 'matchPredictions']);
 
+        // Champion Predictions (dự đoán đội vô địch)
+        Route::prefix('champion-predictions')->group(function () {
+            Route::get('seasons', [ChampionPredictionController::class, 'availableSeasons']);
+            Route::get('seasons/{season}/teams', [ChampionPredictionController::class, 'seasonTeams']);
+            Route::get('seasons/{season}/stats', [ChampionPredictionController::class, 'seasonStats']);
+            Route::get('seasons/{season}/champion', [ChampionPredictionController::class, 'seasonChampion']);
+            Route::get('seasons/{season}/my-prediction', [ChampionPredictionController::class, 'mySeasonPrediction']);
+            Route::get('champions', [ChampionPredictionController::class, 'allChampions']);
+            Route::get('leaderboard', [ChampionPredictionController::class, 'leaderboard']);
+            Route::get('my-rank', [ChampionPredictionController::class, 'myRank']);
+            Route::get('my-predictions', [ChampionPredictionController::class, 'myPredictions']);
+            Route::post('/', [ChampionPredictionController::class, 'store']);
+            Route::get('{championPrediction}', [ChampionPredictionController::class, 'show']);
+            Route::put('{championPrediction}', [ChampionPredictionController::class, 'update']);
+        });
+
         // Teams (protected actions)
         Route::post('teams/{team}/follow', [TeamController::class, 'follow']);
         Route::delete('teams/{team}/follow', [TeamController::class, 'unfollow']);
@@ -211,6 +230,39 @@ Route::prefix('v1')->group(function () {
             Route::delete('players/{player}', [TeamManagementController::class, 'removePlayer']);
             Route::post('staff', [TeamManagementController::class, 'addStaff']);
             Route::delete('staff/{staff}', [TeamManagementController::class, 'removeStaff']);
+        });
+
+        // Journalist Management (Journalists)
+        Route::prefix('journalist')->group(function () {
+            Route::get('articles', [JournalistController::class, 'myArticles']);
+            Route::post('articles', [JournalistController::class, 'store']);
+            Route::put('articles/{news}', [JournalistController::class, 'update']);
+            Route::post('articles/{news}/update', [JournalistController::class, 'update']); // For file uploads
+            Route::delete('articles/{news}', [JournalistController::class, 'destroy']);
+            Route::post('articles/{news}/toggle-publish', [JournalistController::class, 'togglePublish']);
+            Route::get('statistics', [JournalistController::class, 'statistics']);
+            Route::get('sources', [JournalistController::class, 'getSources']);
+            Route::post('fetch-news', [JournalistController::class, 'fetchNews']);
+            Route::get('auto-fetched', [JournalistController::class, 'autoFetchedNews']);
+            Route::delete('clean-old', [JournalistController::class, 'cleanOldNews']);
+        });
+
+        // Match Scheduling (Admin/Manager)
+        Route::prefix('scheduling')->group(function () {
+            Route::get('seasons', [MatchSchedulingController::class, 'seasons']);
+            Route::get('seasons/{season}', [MatchSchedulingController::class, 'seasonDetails']);
+            Route::get('seasons/{season}/rounds', [MatchSchedulingController::class, 'rounds']);
+            Route::post('seasons/{season}/rounds', [MatchSchedulingController::class, 'createRound']);
+            Route::get('rounds/{round}/matches', [MatchSchedulingController::class, 'roundMatches']);
+            Route::post('seasons/{season}/preview', [MatchSchedulingController::class, 'previewSchedule']);
+            Route::post('seasons/{season}/generate', [MatchSchedulingController::class, 'generateSchedule']);
+            Route::delete('seasons/{season}/clear', [MatchSchedulingController::class, 'clearSchedule']);
+            Route::get('seasons/{season}/conflicts', [MatchSchedulingController::class, 'checkConflicts']);
+            Route::post('matches', [MatchSchedulingController::class, 'createMatch']);
+            Route::put('matches/{match}', [MatchSchedulingController::class, 'updateMatch']);
+            Route::post('matches/{match}/reschedule', [MatchSchedulingController::class, 'rescheduleMatch']);
+            Route::post('matches/{match}/swap', [MatchSchedulingController::class, 'swapTeams']);
+            Route::delete('matches/{match}', [MatchSchedulingController::class, 'deleteMatch']);
         });
     });
 });

@@ -17,12 +17,17 @@ Dưới đây là danh sách các tài khoản được tạo sẵn trong hệ t
 *   **Mật khẩu:** `password123`
 *   **Vai trò:** Sponsor (Nhà tài trợ)
 
-## 4. Người dùng Demo (Demo User)
+## 4. Nhà báo (Journalist)
+*   **Email:** `journalist@sportlife.vn`
+*   **Mật khẩu:** `password123`
+*   **Vai trò:** Journalist (Nhà báo - Quản lý và đăng tin tức)
+
+## 5. Người dùng Demo (Demo User)
 *   **Email:** `demo@sportlife.vn`
 *   **Mật khẩu:** `demo123`
 *   **Vai trò:** User (Người dùng thông thường)
 
-## 5. Người dùng mẫu khác (Regular Users)
+## 6. Người dùng mẫu khác (Regular Users)
 Tất cả các tài khoản dưới đây đều có mật khẩu là: `password123`
 
 | Tên | Email | Điểm Sport |

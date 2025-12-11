@@ -199,12 +199,12 @@ class HelpScreen extends ConsumerWidget {
       {
         'question': 'Làm thế nào để dự đoán trận đấu?',
         'answer':
-            'Để dự đoán trận đấu, bạn vào mục "Dự đoán" trong ứng dụng, chọn trận đấu muốn dự đoán và nhập tỷ số dự đoán của bạn. Nhớ dự đoán trước khi trận đấu bắt đầu để được tính điểm.',
+            'Để dự đoán trận đấu, bạn vào mục "Dự đoán" trong ứng dụng, chọn trận đấu muốn dự đoán và chọn kết quả dự đoán (Đội nhà thắng, Hòa, hoặc Đội khách thắng). Nhớ dự đoán trước khi trận đấu bắt đầu để được tính điểm.',
       },
       {
         'question': 'Điểm được tính như thế nào?',
         'answer':
-            'Bạn nhận 3 điểm nếu dự đoán chính xác tỷ số. 1 điểm nếu dự đoán đúng kết quả (thắng/thua/hòa). Không được điểm nếu dự đoán sai hoàn toàn.',
+            'Bạn nhận 10 điểm nếu dự đoán đúng kết quả (thắng/thua/hòa). Không được điểm nếu dự đoán sai.',
       },
       {
         'question': 'Làm sao để đổi điểm lấy phần thưởng?',

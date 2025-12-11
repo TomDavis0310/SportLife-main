@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/providers/news_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
 import '../../data/models/news.dart';
 
 class NewsScreen extends ConsumerStatefulWidget {
@@ -47,11 +48,20 @@ class _NewsScreenState extends ConsumerState<NewsScreen> {
   @override
   Widget build(BuildContext context) {
     final newsAsync = ref.watch(newsProvider);
+    final authState = ref.watch(authStateProvider);
+    final userRoles = authState.valueOrNull?.user?.roles ?? [];
+    final isJournalist = userRoles.contains('journalist') || userRoles.contains('admin');
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tin tức'),
         actions: [
+          if (isJournalist)
+            IconButton(
+              icon: const Icon(Icons.edit_note),
+              tooltip: 'Quản lý bài viết',
+              onPressed: () => context.push('/journalist/news'),
+            ),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: _showSearchDialog,

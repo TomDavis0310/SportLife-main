@@ -18,17 +18,13 @@ class PredictionApi {
 
   Future<Prediction> createPrediction({
     required int matchId,
-    required int predictedHomeScore,
-    required int predictedAwayScore,
-    int? firstScorerId,
+    required String predictedOutcome, // 'home', 'draw', 'away'
   }) async {
     final response = await dio.post(
       '/predictions',
       data: {
         'match_id': matchId,
-        'predicted_home_score': predictedHomeScore,
-        'predicted_away_score': predictedAwayScore,
-        if (firstScorerId != null) 'first_scorer_id': firstScorerId,
+        'predicted_outcome': predictedOutcome,
       },
     );
     return Prediction.fromJson(response.data['data']);
@@ -36,18 +32,12 @@ class PredictionApi {
 
   Future<Prediction> updatePrediction({
     required int predictionId,
-    required int predictedHomeScore,
-    required int predictedAwayScore,
-    int? firstScorerId,
+    required String predictedOutcome, // 'home', 'draw', 'away'
   }) async {
     final response = await dio.put(
       '/predictions/$predictionId',
       data: {
-        'home_score': predictedHomeScore,
-        'away_score': predictedAwayScore,
-        'predicted_home_score': predictedHomeScore,
-        'predicted_away_score': predictedAwayScore,
-        if (firstScorerId != null) 'first_scorer_id': firstScorerId,
+        'predicted_outcome': predictedOutcome,
       },
     );
     return Prediction.fromJson(response.data['data']);

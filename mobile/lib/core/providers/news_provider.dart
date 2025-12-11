@@ -59,3 +59,32 @@ final newsProvider = FutureProvider<List<News>>((ref) async {
   return ref.watch(newsApiProvider).getNews();
 });
 
+// ==================== Journalist Providers ====================
+
+// My Articles Provider (for journalists)
+final myArticlesProvider = FutureProvider.family<List<News>, Map<String, dynamic>?>((
+  ref,
+  params,
+) async {
+  return ref.watch(newsApiProvider).getMyArticles(
+        status: params?['status'],
+        category: params?['category'],
+        page: params?['page'] ?? 1,
+      );
+});
+
+// Simple My Articles Provider
+final journalistArticlesProvider = FutureProvider<List<News>>((ref) async {
+  return ref.watch(newsApiProvider).getMyArticles();
+});
+
+// Journalist Statistics Provider
+final journalistStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  return ref.watch(newsApiProvider).getJournalistStatistics();
+});
+
+// News Sources Provider
+final newsSourcesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  return ref.watch(newsApiProvider).getNewsSources();
+});
+

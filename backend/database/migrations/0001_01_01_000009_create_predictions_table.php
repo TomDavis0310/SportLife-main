@@ -15,14 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('match_id')->constrained('matches')->cascadeOnDelete();
-            $table->unsignedTinyInteger('home_score');
-            $table->unsignedTinyInteger('away_score');
-            $table->foreignId('first_scorer_id')->nullable()->constrained('players')->nullOnDelete();
+            $table->enum('predicted_outcome', ['home', 'draw', 'away']); // Dự đoán kết quả: đội nhà thắng, hòa, đội khách thắng
             $table->unsignedInteger('points_earned')->default(0);
-            $table->boolean('is_correct_score')->default(false);
-            $table->boolean('is_correct_difference')->default(false);
-            $table->boolean('is_correct_winner')->default(false);
-            $table->boolean('is_correct_scorer')->default(false);
+            $table->boolean('is_correct_outcome')->default(false);
             $table->decimal('streak_multiplier', 3, 2)->default(1.00);
             $table->dateTime('calculated_at')->nullable();
             $table->timestamps();

@@ -16,12 +16,18 @@ class NewsResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-newspaper';
 
-    protected static ?string $navigationGroup = 'Nội dung';
+    protected static ?string $navigationGroup = 'Nhà báo';
 
     protected static ?string $modelLabel = 'Tin tức';
 
-    // Ẩn khỏi Admin Panel - để Content Manager quản lý
-    protected static bool $shouldRegisterNavigation = false;
+    protected static ?int $navigationSort = 2;
+
+    // Hiển thị cho Admin và Journalist
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+        return $user && ($user->hasRole(['admin', 'journalist']) || $user->hasPermissionTo('news.view'));
+    }
 
     public static function form(Form $form): Form
     {
@@ -125,6 +131,15 @@ class NewsResource extends Resource
                     ->label('Ngày xuất bản')
                     ->dateTime()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('source_name')
+                    ->label('Nguồn')
+                    ->badge()
+                    ->color('info')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\IconColumn::make('is_auto_fetched')
+                    ->label('Tự động')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('published_at', 'desc')
             ->filters([
@@ -142,6 +157,17 @@ class NewsResource extends Resource
                     ->label('Nổi bật'),
                 Tables\Filters\TernaryFilter::make('is_published')
                     ->label('Đã xuất bản'),
+                Tables\Filters\TernaryFilter::make('is_auto_fetched')
+                    ->label('Tin tự động'),
+                Tables\Filters\SelectFilter::make('source_name')
+                    ->label('Nguồn tin')
+                    ->options([
+                        'VnExpress' => 'VnExpress',
+                        'Thanh Niên' => 'Thanh Niên',
+                        'Tuổi Trẻ' => 'Tuổi Trẻ',
+                        'Bóng Đá Plus' => 'Bóng Đá Plus',
+                        'Bongda24h' => 'Bongda24h',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

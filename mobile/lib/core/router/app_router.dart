@@ -12,8 +12,13 @@ import '../../features/matches/presentation/screens/matches_screen.dart';
 import '../../features/matches/presentation/screens/match_detail_screen.dart';
 import '../../features/predictions/presentation/screens/predictions_screen.dart';
 import '../../features/predictions/presentation/screens/leaderboard_screen.dart';
+import '../../features/predictions/presentation/screens/champion_prediction_screen.dart';
+import '../../features/predictions/presentation/screens/champion_prediction_detail_screen.dart';
 import '../../features/news/presentation/screens/news_screen.dart';
 import '../../features/news/presentation/screens/news_detail_screen.dart';
+import '../../features/news/presentation/screens/journalist_news_screen.dart';
+import '../../features/news/presentation/screens/create_news_screen.dart';
+import '../../features/news/data/models/news.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/settings_screen.dart';
@@ -149,6 +154,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             NewsDetailScreen(newsId: int.parse(state.pathParameters['id']!)),
       ),
+      
+      // Journalist Routes
+      GoRoute(
+        path: '/journalist/news',
+        builder: (context, state) => const JournalistNewsScreen(),
+      ),
+      GoRoute(
+        path: '/journalist/news/create',
+        builder: (context, state) => const CreateNewsScreen(),
+      ),
+      GoRoute(
+        path: '/journalist/news/edit/:id',
+        builder: (context, state) => CreateNewsScreen(
+          editNews: state.extra as News?,
+        ),
+      ),
+      
       GoRoute(
         path: '/team/:id',
         builder: (context, state) =>
@@ -169,6 +191,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/leaderboard',
         builder: (context, state) => const LeaderboardScreen(),
+      ),
+      GoRoute(
+        path: '/champion-prediction',
+        builder: (context, state) => const ChampionPredictionScreen(),
+      ),
+      GoRoute(
+        path: '/champion-prediction/:seasonId',
+        builder: (context, state) => ChampionPredictionDetailScreen(
+          seasonId: int.parse(state.pathParameters['seasonId']!),
+        ),
       ),
       GoRoute(
         path: '/rewards',

@@ -64,30 +64,26 @@ final predictionStatsProvider = FutureProvider<Map<String, dynamic>>((
 // Create Prediction State
 class CreatePredictionState {
   final int? matchId;
-  final int homeScore;
-  final int awayScore;
+  final String? predictedOutcome; // 'home', 'draw', 'away'
   final bool isLoading;
   final String? error;
 
   const CreatePredictionState({
     this.matchId,
-    this.homeScore = 0,
-    this.awayScore = 0,
+    this.predictedOutcome,
     this.isLoading = false,
     this.error,
   });
 
   CreatePredictionState copyWith({
     int? matchId,
-    int? homeScore,
-    int? awayScore,
+    String? predictedOutcome,
     bool? isLoading,
     String? error,
   }) {
     return CreatePredictionState(
       matchId: matchId ?? this.matchId,
-      homeScore: homeScore ?? this.homeScore,
-      awayScore: awayScore ?? this.awayScore,
+      predictedOutcome: predictedOutcome ?? this.predictedOutcome,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
@@ -104,24 +100,18 @@ class CreatePredictionNotifier extends StateNotifier<CreatePredictionState> {
     state = state.copyWith(matchId: matchId);
   }
 
-  void setHomeScore(int score) {
-    state = state.copyWith(homeScore: score);
-  }
-
-  void setAwayScore(int score) {
-    state = state.copyWith(awayScore: score);
+  void setPredictedOutcome(String outcome) {
+    state = state.copyWith(predictedOutcome: outcome);
   }
 
   Future<Prediction?> submit() async {
-    if (state.matchId == null) return null;
+    if (state.matchId == null || state.predictedOutcome == null) return null;
 
     state = state.copyWith(isLoading: true, error: null);
     try {
       final prediction = await api.createPrediction(
         matchId: state.matchId!,
-        predictedHomeScore: state.homeScore,
-        predictedAwayScore: state.awayScore,
-        firstScorerId: null,
+        predictedOutcome: state.predictedOutcome!,
       );
       state = const CreatePredictionState();
       return prediction;

@@ -14,26 +14,16 @@ class Prediction extends Model
     protected $fillable = [
         'user_id',
         'match_id',
-        'home_score',
-        'away_score',
-        'first_scorer_id',
+        'predicted_outcome', // 'home', 'draw', 'away'
         'points_earned',
-        'is_correct_score',
-        'is_correct_difference',
-        'is_correct_winner',
-        'is_correct_scorer',
+        'is_correct_outcome',
         'streak_multiplier',
         'calculated_at',
     ];
 
     protected $casts = [
-        'home_score' => 'integer',
-        'away_score' => 'integer',
         'points_earned' => 'integer',
-        'is_correct_score' => 'boolean',
-        'is_correct_difference' => 'boolean',
-        'is_correct_winner' => 'boolean',
-        'is_correct_scorer' => 'boolean',
+        'is_correct_outcome' => 'boolean',
         'streak_multiplier' => 'decimal:2',
         'calculated_at' => 'datetime',
     ];
@@ -55,14 +45,6 @@ class Prediction extends Model
     }
 
     /**
-     * Predicted first scorer
-     */
-    public function firstScorer(): BelongsTo
-    {
-        return $this->belongsTo(Player::class, 'first_scorer_id');
-    }
-
-    /**
      * Comments on this prediction
      */
     public function comments(): MorphMany
@@ -79,24 +61,16 @@ class Prediction extends Model
     }
 
     /**
-     * Get predicted winner: 'home', 'away', 'draw'
+     * Get predicted outcome label
      */
-    public function getPredictedWinnerAttribute(): string
+    public function getPredictedOutcomeLabelAttribute(): string
     {
-        if ($this->home_score > $this->away_score) {
-            return 'home';
-        } elseif ($this->away_score > $this->home_score) {
-            return 'away';
-        }
-        return 'draw';
-    }
-
-    /**
-     * Get predicted goal difference
-     */
-    public function getPredictedDifferenceAttribute(): int
-    {
-        return abs($this->home_score - $this->away_score);
+        return match($this->predicted_outcome) {
+            'home' => 'Đội nhà thắng',
+            'draw' => 'Hòa',
+            'away' => 'Đội khách thắng',
+            default => 'Chưa dự đoán',
+        };
     }
 
     /**
@@ -120,28 +94,20 @@ class Prediction extends Model
 
         $points = 0;
 
-        // Check exact score (50 points)
-        if ($this->home_score === $match->home_score && $this->away_score === $match->away_score) {
-            $this->is_correct_score = true;
-            $points += 50;
+        // Determine actual match outcome
+        $actualOutcome = 'draw';
+        if ($match->home_score > $match->away_score) {
+            $actualOutcome = 'home';
+        } elseif ($match->away_score > $match->home_score) {
+            $actualOutcome = 'away';
         }
 
-        // Check goal difference (30 points)
-        if ($this->predicted_difference === abs($match->goal_difference)) {
-            $this->is_correct_difference = true;
-            $points += 30;
-        }
-
-        // Check winner (15 points)
-        if ($this->predicted_winner === $match->winner) {
-            $this->is_correct_winner = true;
-            $points += 15;
-        }
-
-        // Check first scorer (20 points)
-        if ($this->first_scorer_id && $this->first_scorer_id === $match->first_scorer_id) {
-            $this->is_correct_scorer = true;
-            $points += 20;
+        // Check if prediction is correct (10 points)
+        if ($this->predicted_outcome === $actualOutcome) {
+            $this->is_correct_outcome = true;
+            $points = 10;
+        } else {
+            $this->is_correct_outcome = false;
         }
 
         // Apply streak multiplier
@@ -159,7 +125,7 @@ class Prediction extends Model
      */
     public function getDisplayPredictionAttribute(): string
     {
-        return "{$this->home_score} - {$this->away_score}";
+        return $this->predicted_outcome_label;
     }
 
     /**

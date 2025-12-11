@@ -46,6 +46,18 @@ class UserSeeder extends Seeder
         ]);
         $sponsor->assignRole('sponsor');
 
+        // Journalist user
+        $journalist = User::updateOrCreate([
+            'email' => 'journalist@sportlife.vn',
+        ], [
+            'name' => 'Nhà báo SportLife',
+            'password' => Hash::make('password123'),
+            'sport_points' => 500,
+            'email_verified_at' => now(),
+            'referral_code' => strtoupper(substr(md5('journalist'), 0, 8)),
+        ]);
+        $journalist->assignRole('journalist');
+
         // Sample regular users
         $users = [
             ['name' => 'Nguyen Van A', 'email' => 'vana@gmail.com', 'sport_points' => 1500],

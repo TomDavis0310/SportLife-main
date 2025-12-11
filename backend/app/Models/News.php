@@ -30,13 +30,22 @@ class News extends Model implements HasMedia
         'views_count',
         'is_published',
         'published_at',
+        'source_name',
+        'source_url',
+        'original_url',
+        'is_auto_fetched',
+        'fetched_at',
+        'tags',
     ];
 
     protected $casts = [
         'is_featured' => 'boolean',
         'is_published' => 'boolean',
+        'is_auto_fetched' => 'boolean',
         'views_count' => 'integer',
         'published_at' => 'datetime',
+        'fetched_at' => 'datetime',
+        'tags' => 'array',
     ];
 
     /**
@@ -60,7 +69,14 @@ class News extends Model implements HasMedia
             return $this->getFirstMediaUrl('thumbnail');
         }
 
-        return $this->thumbnail ?? '/images/default-news.png';
+        $thumbnail = $this->thumbnail ?? '/images/default-news.png';
+        
+        // Return full URL if it's a relative path
+        if ($thumbnail && !str_starts_with($thumbnail, 'http')) {
+            return url($thumbnail);
+        }
+
+        return $thumbnail;
     }
 
     /**
@@ -156,7 +172,10 @@ class News extends Model implements HasMedia
     public function scopePublished($query)
     {
         return $query->where('is_published', true)
-            ->where('published_at', '<=', now())
+            ->where(function ($q) {
+                $q->whereNull('published_at')
+                    ->orWhere('published_at', '<=', now());
+            })
             ->orderByDesc('published_at');
     }
 
@@ -166,5 +185,53 @@ class News extends Model implements HasMedia
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true)->published();
+    }
+
+    /**
+     * Scope for auto-fetched news
+     */
+    public function scopeAutoFetched($query)
+    {
+        return $query->where('is_auto_fetched', true);
+    }
+
+    /**
+     * Scope for news by source
+     */
+    public function scopeFromSource($query, string $sourceName)
+    {
+        return $query->where('source_name', $sourceName);
+    }
+
+    /**
+     * Scope for today's news
+     */
+    public function scopeToday($query)
+    {
+        return $query->whereDate('published_at', today());
+    }
+
+    /**
+     * Check if news is from external source
+     */
+    public function isFromExternalSource(): bool
+    {
+        return !empty($this->source_url) || $this->is_auto_fetched;
+    }
+
+    /**
+     * Get source display name
+     */
+    public function getSourceDisplayAttribute(): ?string
+    {
+        if ($this->source_name) {
+            return $this->source_name;
+        }
+        
+        if ($this->source_url) {
+            return parse_url($this->source_url, PHP_URL_HOST);
+        }
+        
+        return null;
     }
 }
