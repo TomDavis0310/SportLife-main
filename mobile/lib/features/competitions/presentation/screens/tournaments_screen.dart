@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/competition_provider.dart';
 import '../../../../core/providers/auth_provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import 'tournament_registration_screen.dart';
 
 class TournamentsScreen extends ConsumerWidget {
   const TournamentsScreen({super.key});
@@ -37,9 +38,31 @@ class TournamentsScreen extends ConsumerWidget {
                           color: AppTheme.primary, size: 40),
                       title: Text(comp['name'],
                           style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(comp['type'] == 'league'
-                          ? 'Giải Vô Địch Quốc Gia'
-                          : 'Cúp Quốc Gia'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(comp['type'] == 'league'
+                              ? 'Giải Vô Địch Quốc Gia'
+                              : 'Cúp Quốc Gia'),
+                          // Mock sponsor display if data exists, or just a placeholder for demo
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              const Icon(Icons.verified,
+                                  size: 14, color: Colors.blue),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Tài trợ bởi: ${comp['sponsor']?['name'] ?? 'SportLife Premium'}',
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                     if (currentSeason != null) ...[
                       const Divider(),
@@ -58,8 +81,16 @@ class TournamentsScreen extends ConsumerWidget {
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: () => _registerForSeason(
-                                      context, ref, currentSeason['id']),
+                                  onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          TournamentRegistrationScreen(
+                                        season: currentSeason,
+                                        competitionName: comp['name'],
+                                      ),
+                                    ),
+                                  ),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppTheme.primary,
                                     foregroundColor: Colors.white,
@@ -81,29 +112,5 @@ class TournamentsScreen extends ConsumerWidget {
         error: (err, stack) => Center(child: Text('Error: $err')),
       ),
     );
-  }
-
-  Future<void> _registerForSeason(
-      BuildContext context, WidgetRef ref, int seasonId) async {
-    try {
-      await ref.read(managementCompetitionApiProvider).registerTeam(seasonId);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Đăng ký thành công! Vui lòng chờ duyệt.')),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        // Handle specific error messages if possible
-        String message = 'Đăng ký thất bại';
-        if (e.toString().contains('Team already registered')) {
-          message = 'Đội của bạn đã đăng ký giải này rồi';
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
-      }
-    }
   }
 }

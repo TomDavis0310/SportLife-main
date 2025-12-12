@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquid Mobile App Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- CẤU HÌNH CHUNG --- */
+        :root {
+            --primary: #6C63FF;
+            --secondary: #232232;
+            --text-light: #fff;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent; /* Bỏ highlight khi chạm trên mobile */
+        }
+
+        body {
+            background-color: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- KHUNG MÔ PHỎNG ĐIỆN THOẠI (Mobile Wrapper) --- */
+        .app-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 414px; /* Kích thước iPhone Max */
+            height: 100vh;
+            max-height: 900px;
+            background: #16213e;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            /* Nếu xem trên PC thì bo góc, trên điện thoại thì full màn */
+        }
+        @media (min-width: 450px) {
+            .app-wrapper { border-radius: 40px; height: 85vh; }
+        }
+
+        /* --- BACKGROUND ĐỘNG (Lava Lamp Effect) --- */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: 1;
+            opacity: 0.6;
+            animation: moveBlob 10s infinite alternate;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 300px; height: 300px; background: #ff007a; }
+        .blob-2 { bottom: -10%; right: -10%; width: 250px; height: 250px; background: #7a00ff; animation-delay: -5s; }
+        .blob-3 { bottom: 40%; left: 30%; width: 150px; height: 150px; background: #00d2ff; animation-duration: 15s; }
+
+        @keyframes moveBlob {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20px, -20px) scale(1.1); }
+        }
+
+        /* --- MÀN HÌNH WELCOME --- */
+        .welcome-screen {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px 30px;
+            color: var(--text-light);
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        .welcome-header { margin-top: 60px; }
+        .welcome-header h1 { font-size: 3rem; line-height: 1.1; margin-bottom: 10px; text-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .welcome-header p { font-size: 1rem; opacity: 0.8; font-weight: 300; }
+
+        .btn-start {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            padding: 18px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+        .btn-start:active { transform: scale(0.95); }
+        .btn-start i { background: white; color: #1a1a2e; padding: 10px; border-radius: 50%; }
+
+        /* --- BOTTOM SHEET (Form trượt lên) --- */
+        .auth-sheet {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 85%; /* Chiếm 85% màn hình */
+            background: rgba(30, 30, 45, 0.85);
+            backdrop-filter: blur(30px);
+            border-top-left-radius: 40px;
+            border-top-right-radius: 40px;
+            z-index: 10;
+            transform: translateY(100%); /* Ẩn xuống dưới */
+            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            padding: 30px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Hiển thị form khi active */
+        .app-wrapper.active .auth-sheet { transform: translateY(0); }
+        .app-wrapper.active .welcome-screen { transform: scale(0.9); opacity: 0.5; }
+
+        /* Thanh nắm kéo (visual indicator) */
+        .drag-handle {
+            width: 50px;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            margin: 0 auto 30px;
+            cursor: pointer;
+        }
+
+        /* --- THANH CHUYỂN ĐỔI LOGIN / SIGNUP --- */
+        .toggle-box {
+            display: flex;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 5px;
+            position: relative;
+            margin-bottom: 30px;
+        }
+        
+        /* Hiệu ứng trượt của nút active */
+        .toggle-indicator {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: calc(50% - 5px);
+            height: calc(100% - 10px);
+            background: var(--primary);
+            border-radius: 15px;
+            transition: 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
+        }
+        .toggle-box.signup-mode .toggle-indicator { left: 50%; }
+
+        .toggle-btn {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            z-index: 2;
+            color: #ccc;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+        .toggle-btn.active { color: white; font-weight: 600; }
+
+        /* --- CONTAINER CHỨA 2 FORM (Slide ngang) --- */
+        .forms-slider {
+            display: flex;
+            width: 200%; /* Chứa 2 form */
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        
+        .form-section {
+            width: 50%;
+            padding: 0 10px;
+        }
+
+        .toggle-box.signup-mode ~ .forms-slider { transform: translateX(-50%); }
+
+        /* --- INPUT FIELDS --- */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 18px 20px 18px 50px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 18px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+        }
+        .input-group i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            transition: 0.3s;
+        }
+        .input-group input:focus {
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
+        }
+        .input-group input:focus + i { color: var(--primary); }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--primary);
+            border: none;
+            border-radius: 18px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 10px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(108, 99, 255, 0.3);
+            transition: 0.3s;
+        }
+        .submit-btn:active { transform: scale(0.98); }
+
+        .social-login {
+            text-align: center;
+            margin-top: 30px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .social-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .social-icon:hover { background: white; color: var(--secondary); transform: translateY(-3px); }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper" id="app">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+
+        <div class="welcome-screen">
+            <div class="welcome-header">
+                <h1>Explore<br>The Future</h1>
+                <p>Nền tảng kết nối thông minh dành cho giới trẻ.</p>
+            </div>
+            
+            <div class="btn-start" onclick="openSheet()">
+                <span>Bắt đầu ngay</span>
+                <i class="fas fa-arrow-right"></i>
+            </div>
+        </div>
+
+        <div class="auth-sheet">
+            <div class="drag-handle" onclick="closeSheet()"></div>
+            
+            <div class="toggle-box" id="toggleBox">
+                <div class="toggle-indicator"></div>
+                <div class="toggle-btn active" onclick="switchForm('login')">Đăng nhập</div>
+                <div class="toggle-btn" onclick="switchForm('signup')">Đăng ký</div>
+            </div>
+
+            <div class="forms-slider">
+                
+                <div class="form-section">
+                    <div class="input-group">
+                        <input type="email" placeholder="Email của bạn">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" placeholder="Mật khẩu">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <button class="submit-btn">Đăng Nhập</button>
+                    
+                    <div class="social-login">
+                        <p>Hoặc tiếp tục với</p>
+                        <div class="social-icons">
+                            <div class="social-icon"><i class="fab fa-google"></i></div>
+                            <div class="social-icon"><i class="fab fa-facebook-f"></i></div>
+                            <div class="social-icon"><i class="fab fa-apple"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="input-group">
+                        <input type="text" placeholder="Tên hiển thị">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="input-group">
+                        <input type="email" placeholder="Email đăng ký">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" placeholder="Tạo mật khẩu">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <button class="submit-btn" style="background: #ff007a; box-shadow: 0 10px 20px rgba(255, 0, 122, 0.3);">Tạo Tài Khoản</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const app = document.getElementById('app');
+        const toggleBox = document.getElementById('toggleBox');
+        const btns = document.querySelectorAll('.toggle-btn');
+
+        // Mở Bottom Sheet
+        function openSheet() {
+            app.classList.add('active');
+        }
+
+        // Đóng Bottom Sheet (khi bấm vào thanh gạch ngang)
+        function closeSheet() {
+            app.classList.remove('active');
+        }
+
+        // Chuyển đổi giữa Login và Signup
+        function switchForm(type) {
+            if (type === 'signup') {
+                toggleBox.classList.add('signup-mode');
+                btns[0].classList.remove('active');
+                btns[1].classList.add('active');
+            } else {
+                toggleBox.classList.remove('signup-mode');
+                btns[1].classList.remove('active');
+                btns[0].classList.add('active');
+            }
+        }
+    </script>
+
+</body>
+</html>

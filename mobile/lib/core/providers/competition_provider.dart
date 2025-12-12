@@ -52,6 +52,15 @@ final competitionMatchesProvider =
       );
 });
 
+// Simple Competition Matches Provider (just by ID)
+final simpleCompetitionMatchesProvider =
+    FutureProvider.family<List<dynamic>, int>((
+  ref,
+  competitionId,
+) async {
+  return ref.watch(competitionApiProvider).getMatches(competitionId);
+});
+
 // Selected Competition Provider
 final selectedCompetitionProvider = StateProvider<int?>((ref) => null);
 

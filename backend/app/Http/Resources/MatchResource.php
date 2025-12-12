@@ -13,8 +13,16 @@ class MatchResource extends JsonResource
             'id' => $this->id,
             'home_team_id' => $this->home_team_id,
             'away_team_id' => $this->away_team_id,
-            'home_team' => new TeamResource($this->whenLoaded('homeTeam')),
-            'away_team' => new TeamResource($this->whenLoaded('awayTeam')),
+            'home_team' => $this->when(
+                $this->relationLoaded('homeTeam') && $this->homeTeam !== null,
+                fn() => new TeamResource($this->homeTeam),
+                fn() => $this->home_team_id ? null : ['name' => 'TBD', 'short_name' => 'TBD', 'logo' => null]
+            ),
+            'away_team' => $this->when(
+                $this->relationLoaded('awayTeam') && $this->awayTeam !== null,
+                fn() => new TeamResource($this->awayTeam),
+                fn() => $this->away_team_id ? null : ['name' => 'TBD', 'short_name' => 'TBD', 'logo' => null]
+            ),
             'home_score' => $this->home_score,
             'away_score' => $this->away_score,
             'home_score_ht' => $this->home_score_ht,
@@ -25,6 +33,7 @@ class MatchResource extends JsonResource
             'status_text' => $this->status_text,
             'minute' => $this->minute,
             'venue' => $this->venue,
+            'group_name' => $this->group_name,
             'home_form' => $this->getForm($this->home_team_id),
             'away_form' => $this->getForm($this->away_team_id),
             'round_id' => $this->round_id,
@@ -117,8 +126,12 @@ class MatchResource extends JsonResource
         ];
     }
 
-    private function getForm(int $teamId): array
+    private function getForm(?int $teamId): array
     {
+        if (!$teamId) {
+            return []; // Trả về mảng rỗng nếu team chưa xác định
+        }
+        
         $matches = \App\Models\FootballMatch::where(function ($query) use ($teamId) {
                 $query->where('home_team_id', $teamId)
                       ->orWhere('away_team_id', $teamId);

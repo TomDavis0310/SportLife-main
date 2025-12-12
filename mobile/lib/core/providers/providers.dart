@@ -7,4 +7,5 @@ export 'notification_provider.dart';
 export 'prediction_provider.dart';
 export 'reward_provider.dart';
 export 'team_provider.dart';
+export 'tournament_provider.dart';
 

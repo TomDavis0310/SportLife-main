@@ -411,9 +411,48 @@ NOTIFICATIONS
 - `view-campaign-stats`
 - `add-sponsor-balance`
 
-### 5. Guest (no role)
+### 5. Journalist (Nhà báo)
+
+- `news.view`, `news.create`, `news.update`, `news.delete`
+- `news.publish`, `news.manage_own`
+- `news.scrape`, `news.auto_fetch`
+- Quản lý và đăng bài tin tức
+- Fetch tin tức tự động từ các nguồn chính thống
+
+### 6. Guest (no role)
 
 - View public matches, news, standings only
+
+## Auto News Fetching (Tự động lấy tin tức)
+
+Hệ thống tự động lấy tin tức thể thao từ các nguồn chính thống:
+
+### Các nguồn tin được hỗ trợ:
+- VnExpress (Thể thao)
+- Thanh Niên (Thể thao)
+- Tuổi Trẻ (Thể thao)
+- Bóng Đá Plus
+- Bongda24h
+
+### Commands:
+
+```bash
+# Fetch tin tức từ tất cả các nguồn
+php artisan news:fetch
+
+# Fetch từ nguồn cụ thể
+php artisan news:fetch --source=vnexpress
+
+# Dọn dẹp tin cũ (mặc định 30 ngày)
+php artisan news:clean
+
+# Dọn dẹp tin cũ hơn 7 ngày
+php artisan news:clean --days=7
+```
+
+### Scheduled Tasks:
+- Fetch tin tức mới: Mỗi 2 giờ
+- Dọn dẹp tin cũ: Hàng ngày lúc 3:00 AM
 
 ## Setup Instructions
 

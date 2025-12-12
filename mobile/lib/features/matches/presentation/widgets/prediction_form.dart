@@ -19,16 +19,13 @@ class PredictionForm extends ConsumerStatefulWidget {
 }
 
 class _PredictionFormState extends ConsumerState<PredictionForm> {
-  int _homeScore = 0;
-  int _awayScore = 0;
-  int? _firstScorerId;
+  String? _selectedOutcome; // 'home', 'draw', 'away'
   bool _isSubmitting = false;
 
   @override
   Widget build(BuildContext context) {
     final isLoggedIn = ref.watch(isLoggedInProvider);
     final canPredict = widget.match.canPredict;
-    final players = _availablePlayers();
 
     if (!isLoggedIn) {
       return Center(
@@ -50,8 +47,8 @@ class _PredictionFormState extends ConsumerState<PredictionForm> {
 
     if (widget.match.userPrediction != null) {
       final prediction = widget.match.userPrediction;
-      final homeScore = prediction['predicted_home_score'] ?? prediction['home_score'];
-      final awayScore = prediction['predicted_away_score'] ?? prediction['away_score'];
+      final predictedOutcome = prediction['predicted_outcome'] ?? '';
+      final outcomeLabel = _getOutcomeLabel(predictedOutcome);
       
       return Center(
         child: Column(
@@ -64,9 +61,21 @@ class _PredictionFormState extends ConsumerState<PredictionForm> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            Text(
-              'Dự đoán: $homeScore - $awayScore',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: _getOutcomeColor(predictedOutcome).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _getOutcomeColor(predictedOutcome)),
+              ),
+              child: Text(
+                outcomeLabel,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: _getOutcomeColor(predictedOutcome),
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
@@ -101,7 +110,7 @@ class _PredictionFormState extends ConsumerState<PredictionForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Score Prediction
+          // Outcome Prediction
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -111,128 +120,41 @@ class _PredictionFormState extends ConsumerState<PredictionForm> {
             child: Column(
               children: [
                 const Text(
-                  'Dự đoán tỉ số',
+                  'Dự đoán kết quả',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // Home Score
-                    Column(
-                      children: [
-                        Text(
-                          widget.match.homeTeam?.shortName ?? 'Home',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 12),
-                        _buildScoreSelector(
-                          value: _homeScore,
-                          onChanged: (value) {
-                            setState(() => _homeScore = value);
-                          },
-                        ),
-                      ],
-                    ),
-                    const Text(
-                      '-',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    // Away Score
-                    Column(
-                      children: [
-                        Text(
-                          widget.match.awayTeam?.shortName ?? 'Away',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 12),
-                        _buildScoreSelector(
-                          value: _awayScore,
-                          onChanged: (value) {
-                            setState(() => _awayScore = value);
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          // First Scorer (Optional)
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+                // Three outcome options
                 Row(
                   children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 20),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Người ghi bàn đầu tiên',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: _buildOutcomeOption(
+                        outcome: 'home',
+                        label: widget.match.homeTeam?.shortName ?? 'Đội nhà',
+                        sublabel: 'Thắng',
+                        color: Colors.green,
                       ),
                     ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildOutcomeOption(
+                        outcome: 'draw',
+                        label: 'Hòa',
+                        sublabel: '',
+                        color: Colors.orange,
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        '+5 điểm',
-                        style: TextStyle(
-                          color: Colors.amber,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildOutcomeOption(
+                        outcome: 'away',
+                        label: widget.match.awayTeam?.shortName ?? 'Đội khách',
+                        sublabel: 'Thắng',
+                        color: Colors.red,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                players.isEmpty
-                    ? const Text(
-                        'Danh sách cầu thủ sẽ được cập nhật khi có đội hình chính thức.',
-                        style: TextStyle(fontSize: 13, color: Colors.grey),
-                      )
-                    : DropdownButtonFormField<int?>(
-                        value: _firstScorerId,
-                        decoration: const InputDecoration(
-                          hintText: 'Chọn cầu thủ (không bắt buộc)',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: [
-                          const DropdownMenuItem<int?>(
-                            value: null,
-                            child: Text('Không chọn'),
-                          ),
-                          ...players.map(
-                            (player) => DropdownMenuItem<int?>(
-                              value: player['id'] as int,
-                              child: Text(player['name'] as String),
-                            ),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setState(() => _firstScorerId = value);
-                        },
-                      ),
               ],
             ),
           ),
@@ -262,9 +184,7 @@ class _PredictionFormState extends ConsumerState<PredictionForm> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                _buildPointRow('Đoán đúng tỉ số', '+10 điểm'),
-                _buildPointRow('Đoán đúng kết quả', '+5 điểm'),
-                _buildPointRow('Đoán đúng người ghi bàn', '+5 điểm'),
+                _buildPointRow('Đoán đúng kết quả', '+10 điểm'),
               ],
             ),
           ),
@@ -273,7 +193,9 @@ class _PredictionFormState extends ConsumerState<PredictionForm> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isSubmitting ? null : _submitPrediction,
+              onPressed: _isSubmitting || _selectedOutcome == null
+                  ? null
+                  : _submitPrediction,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -290,9 +212,11 @@ class _PredictionFormState extends ConsumerState<PredictionForm> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text(
-                      'Gửi dự đoán',
-                      style: TextStyle(
+                  : Text(
+                      _selectedOutcome == null
+                          ? 'Chọn kết quả để dự đoán'
+                          : 'Gửi dự đoán',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -305,35 +229,59 @@ class _PredictionFormState extends ConsumerState<PredictionForm> {
     );
   }
 
-  Widget _buildScoreSelector({
-    required int value,
-    required ValueChanged<int> onChanged,
+  Widget _buildOutcomeOption({
+    required String outcome,
+    required String label,
+    required String sublabel,
+    required Color color,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            onPressed: value > 0 ? () => onChanged(value - 1) : null,
-            icon: const Icon(Icons.remove),
+    final isSelected = _selectedOutcome == outcome;
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedOutcome = outcome);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withValues(alpha: 0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? color : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
           ),
-          Container(
-            width: 48,
-            alignment: Alignment.center,
-            child: Text(
-              '$value',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: isSelected ? color : null,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          IconButton(
-            onPressed: value < 15 ? () => onChanged(value + 1) : null,
-            icon: const Icon(Icons.add),
-          ),
-        ],
+            if (sublabel.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                sublabel,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isSelected ? color : Colors.grey[600],
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            Icon(
+              isSelected ? Icons.check_circle : Icons.circle_outlined,
+              color: isSelected ? color : Colors.grey[400],
+              size: 28,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -358,40 +306,40 @@ class _PredictionFormState extends ConsumerState<PredictionForm> {
     );
   }
 
-  List<Map<String, dynamic>> _availablePlayers() {
-    final players = <Map<String, dynamic>>[];
-    final seen = <int>{};
-
-    void extract(List<dynamic>? lineup) {
-      if (lineup == null) return;
-      for (final player in lineup) {
-        if (player is Map<String, dynamic>) {
-          final id = player['id'] ?? player['player_id'];
-          final name = player['name'] ?? player['player_name'];
-          if (id is int && name is String && !seen.contains(id)) {
-            seen.add(id);
-            players.add({'id': id, 'name': name});
-          }
-        }
-      }
+  String _getOutcomeLabel(String outcome) {
+    switch (outcome) {
+      case 'home':
+        return '${widget.match.homeTeam?.shortName ?? "Đội nhà"} thắng';
+      case 'draw':
+        return 'Hòa';
+      case 'away':
+        return '${widget.match.awayTeam?.shortName ?? "Đội khách"} thắng';
+      default:
+        return outcome;
     }
+  }
 
-    extract(widget.match.homeLineup);
-    extract(widget.match.awayLineup);
-
-    return players;
+  Color _getOutcomeColor(String outcome) {
+    switch (outcome) {
+      case 'home':
+        return Colors.green;
+      case 'draw':
+        return Colors.orange;
+      case 'away':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 
   Future<void> _submitPrediction() async {
-    if (_isSubmitting) return;
+    if (_isSubmitting || _selectedOutcome == null) return;
     setState(() => _isSubmitting = true);
 
     try {
       await ref.read(predictionApiProvider).createPrediction(
             matchId: widget.match.id,
-            predictedHomeScore: _homeScore,
-            predictedAwayScore: _awayScore,
-            firstScorerId: _firstScorerId,
+            predictedOutcome: _selectedOutcome!,
           );
       ref.invalidate(myPredictionsProvider);
       // Also invalidate match detail to update UI if needed
@@ -404,8 +352,6 @@ class _PredictionFormState extends ConsumerState<PredictionForm> {
             backgroundColor: AppTheme.primary,
           ),
         );
-        // Don't reset score immediately so user sees what they predicted
-        // Or navigate away? For now, just keep state.
       }
     } on DioException catch (e) {
       if (mounted) {

@@ -12,24 +12,16 @@ class Prediction {
   @JsonKey(name: 'match_id')
   final int matchId;
   final Match? match;
-  @JsonKey(name: 'predicted_home_score')
-  final int predictedHomeScore;
-  @JsonKey(name: 'predicted_away_score')
-  final int predictedAwayScore;
-  @JsonKey(name: 'home_score')
-  final int? homeScore;
-  @JsonKey(name: 'away_score')
-  final int? awayScore;
-  @JsonKey(name: 'first_scorer_id')
-  final int? firstScorerId;
-  @JsonKey(name: 'first_scorer')
-  final Map<String, dynamic>? firstScorer;
+  @JsonKey(name: 'predicted_outcome')
+  final String predictedOutcome; // 'home', 'draw', 'away'
+  @JsonKey(name: 'predicted_outcome_label')
+  final String? predictedOutcomeLabel;
   @JsonKey(name: 'points_earned')
   final int? pointsEarned;
-  @JsonKey(name: 'is_correct_score')
-  final bool? isCorrectScore;
   @JsonKey(name: 'is_correct_outcome')
   final bool? isCorrectOutcome;
+  @JsonKey(name: 'is_correct')
+  final bool? isCorrect;
   @JsonKey(name: 'streak_multiplier')
   final double? streakMultiplier;
   @JsonKey(name: 'created_at')
@@ -43,15 +35,11 @@ class Prediction {
     required this.userId,
     required this.matchId,
     this.match,
-    required this.predictedHomeScore,
-    required this.predictedAwayScore,
-    this.homeScore,
-    this.awayScore,
-    this.firstScorerId,
-    this.firstScorer,
+    required this.predictedOutcome,
+    this.predictedOutcomeLabel,
     this.pointsEarned,
-    this.isCorrectScore,
     this.isCorrectOutcome,
+    this.isCorrect,
     this.streakMultiplier,
     this.createdAt,
     this.updatedAt,
@@ -62,8 +50,21 @@ class Prediction {
       _$PredictionFromJson(json);
   Map<String, dynamic> toJson() => _$PredictionToJson(this);
 
-  String get predictionDisplay => '$predictedHomeScore - $predictedAwayScore';
+  String get predictionDisplay => predictedOutcomeLabel ?? _getOutcomeLabel(predictedOutcome);
   bool get isSettled => pointsEarned != null || status == 'completed';
-  bool get isCorrect => isCorrectScore == true || isCorrectOutcome == true;
+  bool get isPredictionCorrect => isCorrectOutcome == true || isCorrect == true;
+  
+  String _getOutcomeLabel(String outcome) {
+    switch (outcome) {
+      case 'home':
+        return 'Đội nhà thắng';
+      case 'draw':
+        return 'Hòa';
+      case 'away':
+        return 'Đội khách thắng';
+      default:
+        return outcome;
+    }
+  }
 }
 

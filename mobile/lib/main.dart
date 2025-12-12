@@ -6,6 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'core/config/app_config.dart';
 import 'core/router/app_router.dart';
@@ -14,6 +15,9 @@ import 'core/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize date formatting for intl package
+  await initializeDateFormatting('vi', null);
 
   // Initialize Firebase (skip on web if not configured)
   try {
@@ -66,7 +70,7 @@ class SportLifeApp extends ConsumerWidget {
 
       // Theme
       theme: AppTheme.lightTheme,
-      // // darkTheme: AppTheme.darkTheme,
+      darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
 
       // Localization

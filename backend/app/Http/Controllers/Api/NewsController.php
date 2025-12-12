@@ -29,11 +29,6 @@ class NewsController extends Controller
             $query->where('team_id', $request->team_id);
         }
 
-        // Filter by competition
-        if ($request->filled('competition_id')) {
-            $query->where('competition_id', $request->competition_id);
-        }
-
         // Search
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -62,7 +57,7 @@ class NewsController extends Controller
     {
         $news = News::published()
             ->featured()
-            ->with(['author', 'team', 'competition'])
+            ->with(['author', 'team'])
             ->orderByDesc('published_at')
             ->limit(5)
             ->get();

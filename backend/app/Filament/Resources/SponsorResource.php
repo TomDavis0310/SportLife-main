@@ -20,6 +20,9 @@ class SponsorResource extends Resource
 
     protected static ?string $modelLabel = 'Nhà tài trợ';
 
+    // Ẩn khỏi Admin Panel - để Sponsor Manager quản lý
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Form $form): Form
     {
         return $form

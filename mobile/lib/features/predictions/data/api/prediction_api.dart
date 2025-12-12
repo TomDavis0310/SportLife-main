@@ -1,5 +1,6 @@
 ﻿import 'package:dio/dio.dart';
 import '../models/prediction.dart';
+import '../models/leaderboard_entry.dart';
 
 class PredictionApi {
   final Dio dio;
@@ -17,17 +18,13 @@ class PredictionApi {
 
   Future<Prediction> createPrediction({
     required int matchId,
-    required int predictedHomeScore,
-    required int predictedAwayScore,
-    int? firstScorerId,
+    required String predictedOutcome, // 'home', 'draw', 'away'
   }) async {
     final response = await dio.post(
       '/predictions',
       data: {
         'match_id': matchId,
-        'predicted_home_score': predictedHomeScore,
-        'predicted_away_score': predictedAwayScore,
-        if (firstScorerId != null) 'first_scorer_id': firstScorerId,
+        'predicted_outcome': predictedOutcome,
       },
     );
     return Prediction.fromJson(response.data['data']);
@@ -35,37 +32,51 @@ class PredictionApi {
 
   Future<Prediction> updatePrediction({
     required int predictionId,
-    required int predictedHomeScore,
-    required int predictedAwayScore,
-    int? firstScorerId,
+    required String predictedOutcome, // 'home', 'draw', 'away'
   }) async {
     final response = await dio.put(
       '/predictions/$predictionId',
       data: {
-        'home_score': predictedHomeScore,
-        'away_score': predictedAwayScore,
-        'predicted_home_score': predictedHomeScore,
-        'predicted_away_score': predictedAwayScore,
-        if (firstScorerId != null) 'first_scorer_id': firstScorerId,
+        'predicted_outcome': predictedOutcome,
       },
     );
     return Prediction.fromJson(response.data['data']);
   }
 
-  Future<List<Map<String, dynamic>>> getLeaderboard({
+  Future<List<LeaderboardEntry>> getLeaderboard({
     String period = 'all_time',
     int? competitionId,
     int page = 1,
   }) async {
     final response = await dio.get(
-      '/predictions/leaderboard',
+      '/leaderboard',
       queryParameters: {
         'period': period,
         if (competitionId != null) 'competition_id': competitionId,
         'page': page,
       },
     );
-    return List<Map<String, dynamic>>.from(response.data['data']);
+
+    if (response.data is! Map<String, dynamic>) {
+      throw Exception('Invalid response format');
+    }
+
+    final data = response.data['data'];
+    if (data is! List) {
+      return [];
+    }
+
+    return data.map((e) {
+      try {
+        if (e is Map) {
+          return LeaderboardEntry.fromJson(Map<String, dynamic>.from(e));
+        }
+        return null;
+      } catch (e) {
+        print('Error parsing leaderboard entry: $e');
+        return null;
+      }
+    }).whereType<LeaderboardEntry>().toList();
   }
 
   Future<Map<String, dynamic>> getMyStats() async {

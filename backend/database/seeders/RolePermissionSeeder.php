@@ -27,6 +27,7 @@ class RolePermissionSeeder extends Seeder
             'matches.view', 'matches.create', 'matches.update', 'matches.delete', 'matches.live_update',
             // News management
             'news.view', 'news.create', 'news.update', 'news.delete', 'news.publish',
+            'news.manage_own', 'news.scrape', 'news.auto_fetch',
             // Reward management
             'rewards.view', 'rewards.create', 'rewards.update', 'rewards.delete',
             'redemptions.view', 'redemptions.process',
@@ -71,6 +72,13 @@ class RolePermissionSeeder extends Seeder
         $sponsorRole->syncPermissions([
             'campaigns.view', 'campaigns.create', 'campaigns.update',
             'reports.view',
+        ]);
+
+        // Create Journalist role - for news management
+        $journalistRole = Role::firstOrCreate(['name' => 'journalist', 'guard_name' => 'web']);
+        $journalistRole->syncPermissions([
+            'news.view', 'news.create', 'news.update', 'news.delete', 'news.publish',
+            'news.manage_own', 'news.scrape', 'news.auto_fetch',
         ]);
 
         Role::firstOrCreate(['name' => 'guest', 'guard_name' => 'web']);

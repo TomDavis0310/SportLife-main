@@ -18,24 +18,12 @@ class PredictionResource extends JsonResource
                 $this->relationLoaded('user'),
                 fn () => new UserResource($this->user)
             ),
-            'predicted_home_score' => $this->home_score,
-            'predicted_away_score' => $this->away_score,
-            'home_score' => $this->home_score,
-            'away_score' => $this->away_score,
-            'first_scorer_id' => $this->first_scorer_id,
-            'first_scorer' => $this->when(
-                $this->relationLoaded('firstScorer') && $this->firstScorer,
-                fn () => [
-                    'id' => $this->firstScorer->id,
-                    'name' => $this->firstScorer->name,
-                    'position' => $this->firstScorer->position,
-                    'jersey_number' => $this->firstScorer->jersey_number,
-                ]
-            ),
+            'predicted_outcome' => $this->predicted_outcome,
+            'predicted_outcome_label' => $this->predicted_outcome_label,
             'points_earned' => $this->calculated_at ? $this->points_earned : null,
             'points' => $this->calculated_at ? $this->points_earned : null,
-            'is_correct_score' => $this->is_correct_score ?? false,
-            'is_correct' => $this->is_correct_score ?? false,
+            'is_correct_outcome' => $this->is_correct_outcome ?? false,
+            'is_correct' => $this->is_correct_outcome ?? false,
             'streak_multiplier' => (float) ($this->streak_multiplier ?? 1.0),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),

@@ -20,6 +20,9 @@ class BadgeResource extends Resource
 
     protected static ?string $modelLabel = 'Huy hiệu';
 
+    // Ẩn khỏi Admin Panel - hệ thống gamification tự động
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Form $form): Form
     {
         return $form

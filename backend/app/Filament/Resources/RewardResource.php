@@ -20,6 +20,9 @@ class RewardResource extends Resource
 
     protected static ?string $modelLabel = 'Phần thưởng';
 
+    // Ẩn khỏi Admin Panel - để Sponsor Manager quản lý
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Form $form): Form
     {
         return $form
@@ -62,7 +65,7 @@ class RewardResource extends Resource
                             ->required()
                             ->numeric()
                             ->minValue(0),
-                        Forms\Components\DatePicker::make('valid_until')
+                        Forms\Components\DatePicker::make('expiry_date')
                             ->label('Hạn sử dụng'),
                         Forms\Components\Toggle::make('is_physical')
                             ->label('Vật phẩm vật lý (cần giao hàng)'),
@@ -73,7 +76,10 @@ class RewardResource extends Resource
                         Forms\Components\FileUpload::make('image')
                             ->label('Hình ảnh')
                             ->image()
-                            ->directory('rewards'),
+                            ->disk('public')
+                            ->directory('rewards')
+                            ->visibility('public')
+                            ->imageEditor(),
                     ]),
 
                 Forms\Components\Section::make('Trạng thái')
@@ -112,7 +118,7 @@ class RewardResource extends Resource
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Kích hoạt')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('valid_until')
+                Tables\Columns\TextColumn::make('expiry_date')
                     ->label('Hạn sử dụng')
                     ->date(),
             ])

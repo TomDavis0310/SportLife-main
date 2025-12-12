@@ -12,7 +12,7 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'username' => $this->username,
+            // 'username' => $this->username, // Removed as column does not exist
             'email' => $this->when($this->isCurrentUser($request), $this->email),
             'avatar' => $this->avatar_url,
             'sport_points' => $this->sport_points,

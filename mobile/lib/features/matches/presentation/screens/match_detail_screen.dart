@@ -1,7 +1,10 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/providers/match_provider.dart';
+import '../../../../core/providers/auth_provider.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../data/models/match.dart';
 import '../widgets/match_header.dart';
 import '../widgets/match_events_tab.dart';
@@ -38,6 +41,7 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen>
   @override
   Widget build(BuildContext context) {
     final matchAsync = ref.watch(matchDetailProvider(widget.matchId));
+    final userAsync = ref.watch(authStateProvider);
 
     return Scaffold(
       body: matchAsync.when(
@@ -58,7 +62,56 @@ class _MatchDetailScreenState extends ConsumerState<MatchDetailScreen>
           ),
         ),
       ),
+      floatingActionButton: matchAsync.whenOrNull(
+        data: (match) {
+          final user = userAsync.valueOrNull?.user;
+          final isSponsor = user?.roles.contains('sponsor') ?? false;
+
+          // Kiểm tra xem nút có nên hiển thị không
+          if (!isSponsor || !_canUpdateMatch(match)) {
+            return null;
+          }
+
+          return FloatingActionButton.extended(
+            onPressed: () => context.push('/match/${match.id}/update'),
+            backgroundColor: AppTheme.primary,
+            icon: const Icon(Icons.edit_note, color: Colors.white),
+            label: const Text(
+              'Cập nhật',
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          );
+        },
+      ),
     );
+  }
+
+  /// Kiểm tra xem có thể cập nhật trận đấu không
+  /// Mở khi trận đấu bắt đầu và đóng sau 2h khi trận kết thúc
+  bool _canUpdateMatch(Match match) {
+    final now = DateTime.now();
+    final matchTime = DateTime.tryParse(match.matchTime);
+
+    if (matchTime == null) return false;
+
+    // Nếu trận đang diễn ra -> cho phép
+    if (match.isLive) return true;
+
+    // Nếu trận đã kết thúc -> kiểm tra 2h
+    if (match.isFinished) {
+      // Ước tính thời gian kết thúc = thời gian bắt đầu + 2h (trận đấu ~2h)
+      final estimatedEndTime = matchTime.add(const Duration(hours: 2));
+      final allowedUntil = estimatedEndTime.add(const Duration(hours: 2));
+      return now.isBefore(allowedUntil);
+    }
+
+    // Nếu trận chưa bắt đầu nhưng đã đến giờ -> cho phép
+    if (match.isScheduled && now.isAfter(matchTime)) {
+      return true;
+    }
+
+    return false;
   }
 
   Widget _buildContent(Match match) {
@@ -147,5 +200,3 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
     return false;
   }
 }
-
-

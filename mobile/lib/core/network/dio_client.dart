@@ -1,5 +1,6 @@
 ﻿import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import '../config/app_config.dart';
 import '../storage/secure_storage.dart';
 
@@ -7,8 +8,8 @@ final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: AppConfig.baseUrl,
-      connectTimeout: AppConfig.connectTimeout,
-      receiveTimeout: AppConfig.receiveTimeout,
+      connectTimeout: const Duration(seconds: 60), // Increase for web
+      receiveTimeout: const Duration(seconds: 60),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -17,7 +18,15 @@ final dioProvider = Provider<Dio>((ref) {
   );
 
   dio.interceptors.add(AuthInterceptor(ref));
-  dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+  
+  // Only add log interceptor in debug mode
+  if (kDebugMode) {
+    dio.interceptors.add(LogInterceptor(
+      requestBody: true, 
+      responseBody: true,
+      logPrint: (obj) => debugPrint(obj.toString()),
+    ));
+  }
 
   return dio;
 });

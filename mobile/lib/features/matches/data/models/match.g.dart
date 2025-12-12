@@ -8,8 +8,8 @@ part of 'match.dart';
 
 Match _$MatchFromJson(Map<String, dynamic> json) => Match(
       id: (json['id'] as num).toInt(),
-      homeTeamId: (json['home_team_id'] as num).toInt(),
-      awayTeamId: (json['away_team_id'] as num).toInt(),
+      homeTeamId: (json['home_team_id'] as num?)?.toInt(),
+      awayTeamId: (json['away_team_id'] as num?)?.toInt(),
       competitionId: (json['competition_id'] as num?)?.toInt(),
       homeTeam: json['home_team'] == null
           ? null

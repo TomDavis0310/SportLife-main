@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
             MissionSeeder::class,
             SponsorSeeder::class,
             RewardSeeder::class,
+            PredictionLeaderboardSeeder::class,
+            StudentWinterCupSeeder::class, // Giải Sinh Viên Mùa Đông
         ]);
     }
 }

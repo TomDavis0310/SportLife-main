@@ -99,8 +99,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final featuredNews = ref.watch(featuredNewsProvider);
     final featuredHighlights = ref.watch(featuredHighlightsProvider);
 
+    final colors = AppTheme.getColors(context);
+
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: colors.background,
       body: RefreshIndicator(
         onRefresh: _refreshContent,
         child: CustomScrollView(
@@ -238,7 +240,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return SliverAppBar(
       pinned: true,
       automaticallyImplyLeading: false,
-      expandedHeight: 240,
+      expandedHeight: 350,
       elevation: 0,
       backgroundColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(

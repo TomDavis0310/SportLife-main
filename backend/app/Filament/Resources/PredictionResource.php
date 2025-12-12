@@ -20,6 +20,9 @@ class PredictionResource extends Resource
 
     protected static ?string $modelLabel = 'Dự đoán';
 
+    // Ẩn khỏi Admin Panel - người dùng tự quản lý
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Form $form): Form
     {
         return $form
@@ -39,23 +42,16 @@ class PredictionResource extends Resource
                             ->searchable(),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Dự đoán tỉ số')
+                Forms\Components\Section::make('Dự đoán kết quả')
                     ->schema([
-                        Forms\Components\TextInput::make('home_score')
-                            ->label('Bàn thắng đội nhà')
-                            ->numeric()
-                            ->minValue(0)
+                        Forms\Components\Select::make('predicted_outcome')
+                            ->label('Dự đoán')
+                            ->options([
+                                'home' => 'Đội nhà thắng',
+                                'draw' => 'Hòa',
+                                'away' => 'Đội khách thắng',
+                            ])
                             ->required(),
-                        Forms\Components\TextInput::make('away_score')
-                            ->label('Bàn thắng đội khách')
-                            ->numeric()
-                            ->minValue(0)
-                            ->required(),
-                        Forms\Components\Select::make('first_scorer_id')
-                            ->label('Cầu thủ ghi bàn đầu tiên')
-                            ->relationship('firstScorer', 'name')
-                            ->searchable()
-                            ->preload(),
                         Forms\Components\TextInput::make('streak_multiplier')
                             ->label('Hệ số chuỗi thắng')
                             ->numeric()
@@ -68,11 +64,9 @@ class PredictionResource extends Resource
                         Forms\Components\TextInput::make('points_earned')
                             ->label('Điểm đạt được')
                             ->numeric(),
-                        Forms\Components\Toggle::make('is_correct_score')
-                            ->label('Tỉ số chính xác'),
-                        Forms\Components\Toggle::make('is_correct_winner')
-                            ->label('Kết quả thắng/thua đúng'),
-                    ])->columns(3),
+                        Forms\Components\Toggle::make('is_correct_outcome')
+                            ->label('Dự đoán đúng'),
+                    ])->columns(2),
             ]);
     }
 
@@ -87,16 +81,28 @@ class PredictionResource extends Resource
                 Tables\Columns\TextColumn::make('match.homeTeam.name')
                     ->label('Trận đấu')
                     ->formatStateUsing(fn ($record) => $record->match ? "{$record->match->homeTeam->short_name} vs {$record->match->awayTeam->short_name}" : ''),
-                Tables\Columns\TextColumn::make('home_score')
+                Tables\Columns\TextColumn::make('predicted_outcome')
                     ->label('Dự đoán')
-                    ->formatStateUsing(fn ($record) => "{$record->home_score} - {$record->away_score}"),
+                    ->formatStateUsing(fn ($state) => match($state) {
+                        'home' => 'Đội nhà thắng',
+                        'draw' => 'Hòa',
+                        'away' => 'Đội khách thắng',
+                        default => $state,
+                    })
+                    ->badge()
+                    ->color(fn ($state) => match($state) {
+                        'home' => 'success',
+                        'draw' => 'warning',
+                        'away' => 'danger',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('points_earned')
                     ->label('Điểm')
                     ->badge()
                     ->color(fn ($state) => $state > 0 ? 'success' : 'gray')
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_correct_score')
-                    ->label('Đúng tỉ số')
+                Tables\Columns\IconColumn::make('is_correct_outcome')
+                    ->label('Đúng')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('streak_multiplier')
                     ->label('Streak')

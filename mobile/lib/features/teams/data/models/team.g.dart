@@ -21,7 +21,14 @@ Team _$TeamFromJson(Map<String, dynamic> json) => Team(
       primaryColor: json['primary_color'] as String?,
       secondaryColor: json['secondary_color'] as String?,
       competitionId: (json['competition_id'] as num?)?.toInt(),
-      players: json['players'] as List<dynamic>? ?? [],
+      players: (json['players'] as List<dynamic>?)
+              ?.map((e) => Player.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      staff: (json['staff'] as List<dynamic>?)
+              ?.map((e) => TeamStaff.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       pivot: json['pivot'] as Map<String, dynamic>?,
     );
 
@@ -41,5 +48,6 @@ Map<String, dynamic> _$TeamToJson(Team instance) => <String, dynamic>{
       'secondary_color': instance.secondaryColor,
       'competition_id': instance.competitionId,
       'players': instance.players,
+      'staff': instance.staff,
       'pivot': instance.pivot,
     };

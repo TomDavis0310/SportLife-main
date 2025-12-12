@@ -162,7 +162,7 @@ class _EventBubble extends StatelessWidget {
                   ),
                 ],
         ),
-        if (subtitle != null) ...[
+        ...[
           const SizedBox(height: 4),
           Text(
             subtitle,

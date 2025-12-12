@@ -55,6 +55,11 @@ class TeamApi {
     return Team.fromJson(response.data['data']);
   }
 
+  Future<Team> updateTeam(Map<String, dynamic> data) async {
+    final response = await dio.put('/my-team', data: data);
+    return Team.fromJson(response.data['data']);
+  }
+
   Future<void> addPlayer({
     required String name,
     required String position,
@@ -67,8 +72,20 @@ class TeamApi {
     });
   }
 
+  Future<void> updatePlayer(int playerId, Map<String, dynamic> data) async {
+    await dio.put('/my-team/players/$playerId', data: data);
+  }
+
   Future<void> removePlayer(int playerId) async {
     await dio.delete('/my-team/players/$playerId');
+  }
+
+  Future<void> addStaff(Map<String, dynamic> data) async {
+    await dio.post('/my-team/staff', data: data);
+  }
+
+  Future<void> removeStaff(int staffId) async {
+    await dio.delete('/my-team/staff/$staffId');
   }
 }
 

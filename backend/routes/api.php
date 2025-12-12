@@ -17,6 +17,10 @@ use App\Http\Controllers\Api\SponsorController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TournamentController;
 use App\Http\Controllers\Api\TeamManagementController;
+use App\Http\Controllers\Api\JournalistController;
+use App\Http\Controllers\Api\ChampionPredictionController;
+use App\Http\Controllers\Api\MatchSchedulingController;
+use App\Http\Controllers\Api\MatchAutoUpdateController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -47,7 +51,11 @@ Route::prefix('v1')->group(function () {
     Route::get('competitions/{competition}/seasons', [CompetitionController::class, 'seasons']);
     Route::get('competitions/{competition}/standings', [CompetitionController::class, 'standings']);
     Route::get('competitions/{competition}/rounds', [CompetitionController::class, 'rounds']);
+    Route::get('competitions/{competition}/matches', [CompetitionController::class, 'matches']);
     Route::get('rounds/{round}/matches', [CompetitionController::class, 'roundMatches']);
+
+    // Tournament schedule (public)
+    Route::get('tournaments/{season}/schedule', [TournamentController::class, 'getSchedule']);
 
     // Matches (public)
     Route::get('matches', [MatchController::class, 'index']);
@@ -67,6 +75,7 @@ Route::prefix('v1')->group(function () {
     Route::get('teams', [TeamController::class, 'index']);
     Route::get('teams/{team}', [TeamController::class, 'show']);
     Route::get('teams/{team}/players', [TeamController::class, 'players']);
+    Route::get('teams/{team}/matches', [TeamController::class, 'matches']);
     Route::get('teams/{team}/upcoming', [TeamController::class, 'upcomingMatches']);
     Route::get('teams/{team}/results', [TeamController::class, 'recentResults']);
     Route::get('teams/{team}/stats', [TeamController::class, 'statistics']);
@@ -130,6 +139,22 @@ Route::prefix('v1')->group(function () {
         });
         Route::get('matches/{match}/prediction', [MatchController::class, 'userPrediction']);
         Route::get('matches/{match}/predictions', [PredictionController::class, 'matchPredictions']);
+
+        // Champion Predictions (dự đoán đội vô địch)
+        Route::prefix('champion-predictions')->group(function () {
+            Route::get('seasons', [ChampionPredictionController::class, 'availableSeasons']);
+            Route::get('seasons/{season}/teams', [ChampionPredictionController::class, 'seasonTeams']);
+            Route::get('seasons/{season}/stats', [ChampionPredictionController::class, 'seasonStats']);
+            Route::get('seasons/{season}/champion', [ChampionPredictionController::class, 'seasonChampion']);
+            Route::get('seasons/{season}/my-prediction', [ChampionPredictionController::class, 'mySeasonPrediction']);
+            Route::get('champions', [ChampionPredictionController::class, 'allChampions']);
+            Route::get('leaderboard', [ChampionPredictionController::class, 'leaderboard']);
+            Route::get('my-rank', [ChampionPredictionController::class, 'myRank']);
+            Route::get('my-predictions', [ChampionPredictionController::class, 'myPredictions']);
+            Route::post('/', [ChampionPredictionController::class, 'store']);
+            Route::get('{championPrediction}', [ChampionPredictionController::class, 'show']);
+            Route::put('{championPrediction}', [ChampionPredictionController::class, 'update']);
+        });
 
         // Teams (protected actions)
         Route::post('teams/{team}/follow', [TeamController::class, 'follow']);
@@ -195,16 +220,81 @@ Route::prefix('v1')->group(function () {
         Route::prefix('tournaments')->group(function () {
             Route::get('/', [TournamentController::class, 'index']);
             Route::post('/', [TournamentController::class, 'store']); // Sponsor only
+            Route::get('{season}', [TournamentController::class, 'show']); // Get season details
             Route::post('{season}/register', [TournamentController::class, 'registerTeam']); // Manager only
             Route::get('{season}/registrations', [TournamentController::class, 'getRegistrations']); // Sponsor only
             Route::post('{season}/registrations/{team}/approve', [TournamentController::class, 'approveRegistration']); // Sponsor only
+            Route::post('{season}/registrations/{team}/reject', [TournamentController::class, 'rejectRegistration']); // Sponsor only
+            Route::post('{season}/lock-registration', [TournamentController::class, 'lockRegistration']); // Sponsor only
+            Route::post('{season}/unlock-registration', [TournamentController::class, 'unlockRegistration']); // Sponsor only
+            Route::get('{season}/schedule', [TournamentController::class, 'getSchedule']); // Public - view schedule
+            Route::post('{season}/schedule/preview', [TournamentController::class, 'previewSchedule']); // Sponsor only
+            Route::post('{season}/schedule/generate', [TournamentController::class, 'generateSchedule']); // Sponsor only
+            Route::delete('{season}/schedule', [TournamentController::class, 'clearSchedule']); // Sponsor only
+            Route::put('{season}/matches/{match}', [TournamentController::class, 'updateMatch']); // Sponsor only
+        });
+
+        // Live Match Management (Sponsors)
+        Route::prefix('live-matches')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\LiveMatchController::class, 'getMatches']);
+            Route::get('{match}', [\App\Http\Controllers\Api\LiveMatchController::class, 'getMatch']);
+            Route::post('{match}/start', [\App\Http\Controllers\Api\LiveMatchController::class, 'startMatch']);
+            Route::put('{match}/status', [\App\Http\Controllers\Api\LiveMatchController::class, 'updateStatus']);
+            Route::put('{match}/score', [\App\Http\Controllers\Api\LiveMatchController::class, 'updateScore']);
+            Route::post('{match}/events', [\App\Http\Controllers\Api\LiveMatchController::class, 'addEvent']);
+            Route::delete('{match}/events/{event}', [\App\Http\Controllers\Api\LiveMatchController::class, 'deleteEvent']);
+            Route::post('{match}/end', [\App\Http\Controllers\Api\LiveMatchController::class, 'endMatch']);
         });
 
         // Team Management (Club Managers)
         Route::prefix('my-team')->group(function () {
             Route::get('/', [TeamManagementController::class, 'getMyTeam']);
+            Route::put('/', [TeamManagementController::class, 'update']);
             Route::post('players', [TeamManagementController::class, 'addPlayer']);
+            Route::put('players/{player}', [TeamManagementController::class, 'updatePlayer']);
             Route::delete('players/{player}', [TeamManagementController::class, 'removePlayer']);
+            Route::post('staff', [TeamManagementController::class, 'addStaff']);
+            Route::delete('staff/{staff}', [TeamManagementController::class, 'removeStaff']);
+        });
+
+        // Journalist Management (Journalists)
+        Route::prefix('journalist')->group(function () {
+            Route::get('articles', [JournalistController::class, 'myArticles']);
+            Route::post('articles', [JournalistController::class, 'store']);
+            Route::put('articles/{news}', [JournalistController::class, 'update']);
+            Route::post('articles/{news}/update', [JournalistController::class, 'update']); // For file uploads
+            Route::delete('articles/{news}', [JournalistController::class, 'destroy']);
+            Route::post('articles/{news}/toggle-publish', [JournalistController::class, 'togglePublish']);
+            Route::get('statistics', [JournalistController::class, 'statistics']);
+            Route::get('sources', [JournalistController::class, 'getSources']);
+            Route::post('fetch-news', [JournalistController::class, 'fetchNews']);
+            Route::get('auto-fetched', [JournalistController::class, 'autoFetchedNews']);
+            Route::delete('clean-old', [JournalistController::class, 'cleanOldNews']);
+        });
+
+        // Match Scheduling (Admin/Manager)
+        Route::prefix('scheduling')->group(function () {
+            Route::get('seasons', [MatchSchedulingController::class, 'seasons']);
+            Route::get('seasons/{season}', [MatchSchedulingController::class, 'seasonDetails']);
+            Route::get('seasons/{season}/rounds', [MatchSchedulingController::class, 'rounds']);
+            Route::post('seasons/{season}/rounds', [MatchSchedulingController::class, 'createRound']);
+            Route::get('rounds/{round}/matches', [MatchSchedulingController::class, 'roundMatches']);
+            Route::post('seasons/{season}/preview', [MatchSchedulingController::class, 'previewSchedule']);
+            Route::post('seasons/{season}/generate', [MatchSchedulingController::class, 'generateSchedule']);
+            Route::delete('seasons/{season}/clear', [MatchSchedulingController::class, 'clearSchedule']);
+            Route::get('seasons/{season}/conflicts', [MatchSchedulingController::class, 'checkConflicts']);
+            Route::post('matches', [MatchSchedulingController::class, 'createMatch']);
+            Route::put('matches/{match}', [MatchSchedulingController::class, 'updateMatch']);
+            Route::post('matches/{match}/reschedule', [MatchSchedulingController::class, 'rescheduleMatch']);
+            Route::post('matches/{match}/swap', [MatchSchedulingController::class, 'swapTeams']);
+            Route::delete('matches/{match}', [MatchSchedulingController::class, 'deleteMatch']);
+        });
+
+        // Match Auto Update (Admin/Sponsor)
+        Route::prefix('match-auto-update')->group(function () {
+            Route::get('pending', [MatchAutoUpdateController::class, 'getPendingMatches']);
+            Route::post('trigger', [MatchAutoUpdateController::class, 'triggerAutoUpdate']);
+            Route::post('matches/{match}', [MatchAutoUpdateController::class, 'updateSingleMatch']);
         });
     });
 });

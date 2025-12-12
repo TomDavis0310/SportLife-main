@@ -20,10 +20,17 @@ News _$NewsFromJson(Map<String, dynamic> json) => News(
       likesCount: (json['likes_count'] as num?)?.toInt(),
       commentsCount: (json['comments_count'] as num?)?.toInt(),
       isFeatured: json['is_featured'] as bool? ?? false,
+      isPublished: json['is_published'] as bool? ?? false,
       publishedAt: json['published_at'] as String?,
       isLiked: json['is_liked'] as bool?,
       author: json['author'] as String?,
+      authorId: (json['author_id'] as num?)?.toInt(),
       tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      sourceName: json['source_name'] as String?,
+      sourceUrl: json['source_url'] as String?,
+      originalUrl: json['original_url'] as String?,
+      isAutoFetched: json['is_auto_fetched'] as bool?,
+      fetchedAt: json['fetched_at'] as String?,
     );
 
 Map<String, dynamic> _$NewsToJson(News instance) => <String, dynamic>{
@@ -40,8 +47,15 @@ Map<String, dynamic> _$NewsToJson(News instance) => <String, dynamic>{
       'likes_count': instance.likesCount,
       'comments_count': instance.commentsCount,
       'is_featured': instance.isFeatured,
+      'is_published': instance.isPublished,
       'published_at': instance.publishedAt,
       'is_liked': instance.isLiked,
       'author': instance.author,
+      'author_id': instance.authorId,
       'tags': instance.tags,
+      'source_name': instance.sourceName,
+      'source_url': instance.sourceUrl,
+      'original_url': instance.originalUrl,
+      'is_auto_fetched': instance.isAutoFetched,
+      'fetched_at': instance.fetchedAt,
     };

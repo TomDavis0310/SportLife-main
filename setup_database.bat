@@ -2,7 +2,7 @@
 title SportLife Database Setup
 color 0C
 
-set PHP_PATH=C:\laragon\bin\php\php-8.3.16-Win32-vs16-x64\php.exe
+set PHP_PATH=C:\laragon\bin\php\php-8.3.26-Win32-vs16-x64\php.exe
 set BACKEND_PATH=%~dp0backend
 
 echo ============================================

@@ -24,9 +24,9 @@ enum MatchStatus {
 class Match {
   final int id;
   @JsonKey(name: 'home_team_id')
-  final int homeTeamId;
+  final int? homeTeamId; // Nullable để hỗ trợ trận TBD
   @JsonKey(name: 'away_team_id')
-  final int awayTeamId;
+  final int? awayTeamId; // Nullable để hỗ trợ trận TBD
   @JsonKey(name: 'competition_id')
   final int? competitionId;
   @JsonKey(name: 'home_team')
@@ -77,8 +77,8 @@ class Match {
 
   Match({
     required this.id,
-    required this.homeTeamId,
-    required this.awayTeamId,
+    this.homeTeamId, // Nullable
+    this.awayTeamId, // Nullable
     this.competitionId,
     this.homeTeam,
     this.awayTeam,
@@ -115,6 +115,7 @@ class Match {
   bool get isFinished => status == MatchStatus.finished;
   bool get isScheduled => status == MatchStatus.scheduled;
   bool get canPredict => canPredictField ?? (status == MatchStatus.scheduled);
+  bool get isTeamTBD => homeTeamId == null || awayTeamId == null; // Kiểm tra TBD
 
   String get scoreDisplay {
     if (homeScore != null && awayScore != null) {

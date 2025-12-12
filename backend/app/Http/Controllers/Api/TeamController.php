@@ -61,7 +61,7 @@ class TeamController extends Controller
     {
         $players = $team->players()
             ->orderBy('position')
-            ->orderBy('shirt_number')
+            ->orderBy('jersey_number')
             ->get();
 
         return response()->json([
@@ -103,6 +103,29 @@ class TeamController extends Controller
         return response()->json([
             'success' => true,
             'data' => MatchResource::collection($matches),
+        ]);
+    }
+
+    /**
+     * Get all team matches
+     */
+    public function matches(Team $team, Request $request): JsonResponse
+    {
+        $limit = $request->input('limit', 20);
+        
+        $matches = $team->allMatches()
+            ->with(['homeTeam', 'awayTeam', 'round.season.competition'])
+            ->orderByDesc('match_date')
+            ->paginate($limit);
+
+        return response()->json([
+            'success' => true,
+            'data' => MatchResource::collection($matches),
+            'meta' => [
+                'current_page' => $matches->currentPage(),
+                'last_page' => $matches->lastPage(),
+                'total' => $matches->total(),
+            ],
         ]);
     }
 

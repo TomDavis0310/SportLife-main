@@ -10,13 +10,22 @@ import '../../features/auth/presentation/screens/welcome_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/matches/presentation/screens/matches_screen.dart';
 import '../../features/matches/presentation/screens/match_detail_screen.dart';
+import '../../features/matches/presentation/screens/live_match_update_screen.dart';
 import '../../features/predictions/presentation/screens/predictions_screen.dart';
 import '../../features/predictions/presentation/screens/leaderboard_screen.dart';
+import '../../features/predictions/presentation/screens/champion_prediction_screen.dart';
+import '../../features/predictions/presentation/screens/champion_prediction_detail_screen.dart';
 import '../../features/news/presentation/screens/news_screen.dart';
 import '../../features/news/presentation/screens/news_detail_screen.dart';
+import '../../features/news/presentation/screens/journalist_news_screen.dart';
+import '../../features/news/presentation/screens/create_news_screen.dart';
+import '../../features/news/data/models/news.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/settings_screen.dart';
+import '../../features/profile/presentation/screens/profile_statistics_screen.dart';
+import '../../features/profile/presentation/screens/help_screen.dart';
+import '../../features/profile/presentation/screens/profile_progress_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/rewards/presentation/screens/rewards_screen.dart';
 import '../../features/rewards/presentation/screens/reward_detail_screen.dart';
@@ -24,6 +33,8 @@ import '../../features/rewards/presentation/screens/my_rewards_screen.dart';
 import '../../features/teams/presentation/screens/teams_screen.dart';
 import '../../features/teams/presentation/screens/team_detail_screen.dart';
 import '../../features/competitions/presentation/screens/tournaments_screen.dart';
+import '../../features/competitions/presentation/screens/competitions_screen.dart';
+import '../../features/competitions/presentation/screens/competition_detail_screen.dart';
 import '../../features/competitions/presentation/screens/sponsor_screen.dart';
 import '../../features/teams/presentation/screens/my_team_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
@@ -63,7 +74,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Auth Routes
       GoRoute(
-          path: '/welcome', builder: (context, state) => const WelcomeScreen()),
+        path: '/welcome',
+        builder: (context, state) {
+          final mode = state.uri.queryParameters['mode'];
+          return WelcomeScreen(initialMode: mode);
+        },
+      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
@@ -118,6 +134,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: ProfileScreen()),
           ),
+          GoRoute(
+            path: '/competitions',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: CompetitionsScreen()),
+          ),
         ],
       ),
 
@@ -128,10 +149,39 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             MatchDetailScreen(matchId: int.parse(state.pathParameters['id']!)),
       ),
       GoRoute(
+        path: '/match/:id/update',
+        builder: (context, state) =>
+            LiveMatchUpdateScreen(matchId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/competition/:id',
+        builder: (context, state) => CompetitionDetailScreen(
+          competitionId: int.parse(state.pathParameters['id']!),
+          initialData: state.extra,
+        ),
+      ),
+      GoRoute(
         path: '/news/:id',
         builder: (context, state) =>
             NewsDetailScreen(newsId: int.parse(state.pathParameters['id']!)),
       ),
+      
+      // Journalist Routes
+      GoRoute(
+        path: '/journalist/news',
+        builder: (context, state) => const JournalistNewsScreen(),
+      ),
+      GoRoute(
+        path: '/journalist/news/create',
+        builder: (context, state) => const CreateNewsScreen(),
+      ),
+      GoRoute(
+        path: '/journalist/news/edit/:id',
+        builder: (context, state) => CreateNewsScreen(
+          editNews: state.extra as News?,
+        ),
+      ),
+      
       GoRoute(
         path: '/team/:id',
         builder: (context, state) =>
@@ -143,11 +193,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           rewardId: int.parse(state.pathParameters['id']!),
         ),
       ),
-
-      // Other Routes
       GoRoute(
         path: '/leaderboard',
         builder: (context, state) => const LeaderboardScreen(),
+      ),
+      GoRoute(
+        path: '/champion-prediction',
+        builder: (context, state) => const ChampionPredictionScreen(),
+      ),
+      GoRoute(
+        path: '/champion-prediction/:seasonId',
+        builder: (context, state) => ChampionPredictionDetailScreen(
+          seasonId: int.parse(state.pathParameters['seasonId']!),
+        ),
       ),
       GoRoute(
         path: '/rewards',
@@ -161,6 +219,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/edit-profile',
         builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/profile/edit',
+        builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/profile/statistics',
+        builder: (context, state) => const ProfileStatisticsScreen(),
+      ),
+      GoRoute(
+        path: '/profile/progress',
+        builder: (context, state) => const ProfileProgressScreen(),
+      ),
+      GoRoute(
+        path: '/help',
+        builder: (context, state) => const HelpScreen(),
       ),
       GoRoute(
         path: '/settings',

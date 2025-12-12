@@ -19,6 +19,7 @@ class AuthUserResource extends JsonResource
             'email' => $this->email, // Always include for authenticated user
             'avatar' => $this->avatar_url,
             'sport_points' => $this->sport_points,
+            'total_points' => $this->sport_points, // Alias for mobile app compatibility
             'level' => $this->level,
             'level_name' => $this->level_name,
             'rank' => $this->rank,

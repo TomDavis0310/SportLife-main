@@ -104,7 +104,7 @@ class PredictionsScreen extends ConsumerWidget {
   Widget _buildPredictionCard(BuildContext context, Prediction prediction) {
     final match = prediction.match;
     final isPending = !prediction.isSettled;
-    final isCorrect = prediction.isCorrect;
+    final isCorrect = prediction.isPredictionCorrect;
     final hasResult = match?.homeScore != null && match?.awayScore != null;
     final timeLabel = match?.matchTime != null
         ? _formatMatchTime(match!.matchTime)
@@ -219,17 +219,30 @@ class PredictionsScreen extends ConsumerWidget {
                       'Dự đoán',
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
-                    Text(
-                      '${prediction.predictedHomeScore} - ${prediction.predictedAwayScore}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _getOutcomeColor(prediction.predictedOutcome).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: _getOutcomeColor(prediction.predictedOutcome)),
+                      ),
+                      child: Text(
+                        prediction.predictionDisplay,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: _getOutcomeColor(prediction.predictedOutcome),
+                        ),
                       ),
                     ),
                     if (prediction.streakMultiplier != null)
-                      Text(
-                        'Hệ số streak x${prediction.streakMultiplier?.toStringAsFixed(1)}',
-                        style: const TextStyle(fontSize: 12),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          'Hệ số streak x${prediction.streakMultiplier?.toStringAsFixed(1)}',
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ),
                   ],
                 ),
@@ -240,9 +253,10 @@ class PredictionsScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Kết quả',
+                        'Kết quả thực tế',
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
+                      const SizedBox(height: 4),
                       Text(
                         '${match?.homeScore ?? '-'} - ${match?.awayScore ?? '-'}',
                         style: const TextStyle(
@@ -250,30 +264,46 @@ class PredictionsScreen extends ConsumerWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      if (hasResult)
+                        Text(
+                          _getActualOutcomeLabel(match!),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
                     ],
                   ),
                 ),
             ],
           ),
-          if (prediction.firstScorer != null &&
-              prediction.firstScorer!['name'] != null) ...[
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(Icons.star, color: Colors.amber, size: 18),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    'Người ghi bàn đầu: ${prediction.firstScorer!['name']}',
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                ),
-              ],
-            ),
-          ],
         ],
       ),
     );
+  }
+
+  Color _getOutcomeColor(String outcome) {
+    switch (outcome) {
+      case 'home':
+        return Colors.green;
+      case 'draw':
+        return Colors.orange;
+      case 'away':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getActualOutcomeLabel(match) {
+    if (match.homeScore == null || match.awayScore == null) return '';
+    if (match.homeScore > match.awayScore) {
+      return '(${match.homeTeam?.shortName ?? "Đội nhà"} thắng)';
+    } else if (match.awayScore > match.homeScore) {
+      return '(${match.awayTeam?.shortName ?? "Đội khách"} thắng)';
+    } else {
+      return '(Hòa)';
+    }
   }
 
   String _formatMatchTime(String raw) {
@@ -289,7 +319,7 @@ class PredictionsScreen extends ConsumerWidget {
 class _PredictionCountdown extends StatefulWidget {
   final DateTime matchTime;
 
-  const _PredictionCountdown({super.key, required this.matchTime});
+  const _PredictionCountdown({required this.matchTime});
 
   @override
   State<_PredictionCountdown> createState() => _PredictionCountdownState();
