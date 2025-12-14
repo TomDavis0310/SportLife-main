@@ -8,6 +8,7 @@ use App\Models\Season;
 use App\Models\Team;
 use App\Models\FootballMatch;
 use App\Models\Round;
+use App\Models\Standing;
 use App\Services\MatchSchedulingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -322,7 +323,8 @@ class TournamentController extends Controller
         }
 
         // Check minimum teams
-        $approvedCount = $season->teams()->wherePivot('status', 'approved')->count();
+        $approvedTeams = $season->teams()->wherePivot('status', 'approved')->get();
+        $approvedCount = $approvedTeams->count();
         if ($approvedCount < 2) {
             return response()->json([
                 'success' => false,
@@ -331,6 +333,29 @@ class TournamentController extends Controller
         }
 
         $season->update(['registration_locked' => true]);
+
+        // Initialize standings for all approved teams
+        $position = 1;
+        foreach ($approvedTeams as $team) {
+            Standing::firstOrCreate(
+                [
+                    'season_id' => $season->id,
+                    'team_id' => $team->id,
+                ],
+                [
+                    'position' => $position++,
+                    'played' => 0,
+                    'won' => 0,
+                    'drawn' => 0,
+                    'lost' => 0,
+                    'goals_for' => 0,
+                    'goals_against' => 0,
+                    'goal_difference' => 0,
+                    'points' => 0,
+                    'form' => '',
+                ]
+            );
+        }
 
         return response()->json([
             'success' => true, 

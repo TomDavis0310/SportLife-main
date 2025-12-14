@@ -26,7 +26,11 @@ class CompetitionResource extends JsonResource
                 fn() => $this->getMatchesCount(),
                 0
             ),
-            'goals_count' => 0,
+            'goals_count' => $this->when(
+                $this->relationLoaded('seasons'),
+                fn() => $this->getGoalsCount(),
+                0
+            ),
             'seasons' => $this->when(
                 $this->relationLoaded('seasons'),
                 fn() => SeasonResource::collection($this->seasons)
@@ -125,5 +129,32 @@ class CompetitionResource extends JsonResource
             }
         }
         return $count;
+    }
+
+    /**
+     * Get total goals count for this competition from standings
+     */
+    private function getGoalsCount(): int
+    {
+        if (!$this->relationLoaded('seasons')) {
+            return 0;
+        }
+        
+        $totalGoals = 0;
+        
+        // Get current season or latest season
+        $currentSeason = $this->seasons->firstWhere('is_current', true);
+        if (!$currentSeason) {
+            $currentSeason = $this->seasons->first();
+        }
+        
+        if ($currentSeason && $currentSeason->relationLoaded('standings')) {
+            // Sum goals_for from all standings (each team's scored goals)
+            foreach ($currentSeason->standings as $standing) {
+                $totalGoals += $standing->goals_for ?? 0;
+            }
+        }
+        
+        return $totalGoals;
     }
 }

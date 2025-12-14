@@ -39,7 +39,7 @@ class MatchEventsTab extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final event = events[index];
-        return _EventTimelineItem(match: match, event: event);
+        return _EventTimelineItem(match: match, event: event, index: index);
       },
     );
   }
@@ -48,13 +48,31 @@ class MatchEventsTab extends StatelessWidget {
 class _EventTimelineItem extends StatelessWidget {
   final Match match;
   final MatchEvent event;
+  final int index;
 
-  const _EventTimelineItem({required this.match, required this.event});
+  const _EventTimelineItem({
+    required this.match,
+    required this.event,
+    required this.index,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isHomeEvent =
-        event.isHomeSide || (event.teamId != null && event.teamId == match.homeTeamId);
+    // Determine if event is from home team
+    // Priority: 1) teamSide field, 2) teamId comparison, 3) alternate by index
+    bool isHomeEvent;
+    
+    if (event.teamSide != null && event.teamSide!.isNotEmpty) {
+      // Use teamSide if available
+      isHomeEvent = event.teamSide == 'home';
+    } else if (event.teamId != null && match.homeTeamId != null) {
+      // Fallback to comparing teamId with homeTeamId
+      isHomeEvent = event.teamId == match.homeTeamId;
+    } else {
+      // If no team info available, alternate by index for visual balance
+      isHomeEvent = index.isEven;
+    }
+    
     final icon = _eventIcon(event.eventType);
     final color = _eventColor(event.eventType);
 
@@ -72,10 +90,10 @@ class _EventTimelineItem extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: Align(
-            alignment: Alignment.centerRight,
+            alignment: Alignment.centerLeft,
             child: isHomeEvent
                 ? _EventBubble(
-                    alignRight: true,
+                    alignRight: false,
                     icon: icon,
                     color: color,
                     event: event,
@@ -94,10 +112,10 @@ class _EventTimelineItem extends StatelessWidget {
         ),
         Expanded(
           child: Align(
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.centerRight,
             child: !isHomeEvent
                 ? _EventBubble(
-                    alignRight: false,
+                    alignRight: true,
                     icon: icon,
                     color: color,
                     event: event,

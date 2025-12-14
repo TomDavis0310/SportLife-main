@@ -43,7 +43,7 @@ class CompetitionController extends Controller
         $competition->load([
             'seasons' => function ($q) {
                 $q->orderByDesc('start_date')
-                  ->with(['teams', 'rounds' => function($rq) {
+                  ->with(['teams', 'standings', 'rounds' => function($rq) {
                       $rq->orderBy('round_number')->withCount('matches');
                   }]);
             },
